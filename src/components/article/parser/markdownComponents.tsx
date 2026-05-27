@@ -6,7 +6,7 @@ import { CustomImage, SakuraIcon } from '@/components/ui'
 import { generateHierarchicalSlug, slugPrefix } from '@/services/utils'
 import { KEY_ICONS } from './keyboardIcons'
 import { MarkdownDetails, MarkdownSummary } from './MarkdownDetails'
-import { SpoilerText } from './remarkDiscourse/components'
+import { SpoilerText } from './remarkExtendedMarkdown/components'
 
 const CodeBlock = dynamic(async () => import('./codeBlock/renderCodeBlock'))
 const FriendLinks = dynamic(async () => import('./FriendLinks'))
