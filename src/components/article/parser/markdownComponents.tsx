@@ -7,7 +7,13 @@ import { generateHierarchicalSlug, slugPrefix } from '@/services/utils'
 import { KEY_ICONS } from './keyboardIcons'
 import { MarkdownAdmonition } from './MarkdownAdmonition'
 import { MarkdownDetails, MarkdownSummary } from './MarkdownDetails'
+import { MarkdownGallery } from './MarkdownGallery'
 import { MarkdownImage } from './MarkdownImage'
+import {
+  MarkdownAbbreviation,
+  MarkdownFootnoteBackReference,
+  MarkdownFootnoteReference,
+} from './MarkdownTooltip'
 import { SpoilerText } from './remarkExtendedMarkdown/components'
 
 const CodeBlock = dynamic(async () => import('./codeBlock/renderCodeBlock'))
@@ -21,6 +27,11 @@ type MarkdownAnchorProps = ComponentPropsWithoutRef<'a'> & {
 
 type MarkdownSectionProps = ComponentPropsWithoutRef<'section'> & {
   'data-footnotes'?: boolean | string
+  'node'?: unknown
+}
+
+type MarkdownDivProps = ComponentPropsWithoutRef<'div'> & {
+  'data-gallery-mode'?: 'carousel' | 'grid'
   'node'?: unknown
 }
 
@@ -163,16 +174,7 @@ const createMarkdownComponents = (translation: Translation, autoSlug: boolean = 
         {children}
       </sub>
     ),
-    abbr: ({ children, className = '', title }) => (
-      <abbr
-        className={`cursor-help rounded-sm decoration-dotted underline-offset-4 outline-none transition-colors hover:text-primary focus-visible:ring-2 focus-visible:ring-primary-300 ${className}`}
-        title={title}
-        aria-label={title != null && title !== '' ? `${children?.toString()}: ${title}` : undefined}
-        tabIndex={0}
-      >
-        {children}
-      </abbr>
-    ),
+    abbr: MarkdownAbbreviation,
     blockquote: ({ children }) => (
       <div className="my-3 flex justify-center">
         <blockquote className="w-[95%] rounded-md border-l-4 border-primary-300 dark:border-primary-200 bg-gray-light bg-opacity-75 py-0.5 pl-3 pr-2 italic shadow-sm transition-shadow duration-300 hover:shadow-md">
@@ -181,6 +183,29 @@ const createMarkdownComponents = (translation: Translation, autoSlug: boolean = 
       </div>
     ),
     aside: MarkdownAdmonition,
+    div: ({
+      children,
+      className,
+      node: _node,
+      ...props
+    }: MarkdownDivProps) => {
+      if (props['data-gallery-mode'] != null) {
+        return (
+          <MarkdownGallery
+            className={className}
+            {...props}
+          >
+            {children}
+          </MarkdownGallery>
+        )
+      }
+
+      return (
+        <div className={className} {...props}>
+          {children}
+        </div>
+      )
+    },
     details: MarkdownDetails,
     summary: MarkdownSummary,
 
@@ -223,25 +248,46 @@ const createMarkdownComponents = (translation: Translation, autoSlug: boolean = 
     },
 
     // List related
-    ul: ({ children }) => (
-      <div className="my-4 rounded-lg border-2 border-dashed border-primary-300 dark:border-primary-200 p-3">
-        <ul className="ml-2 list-disc list-inside">
+    ul: ({ children, className = '', ...props }) => {
+      const isTaskList = hasToken(className, 'contains-task-list')
+
+      return (
+        <ul
+          {...props}
+          className={
+            isTaskList
+              ? `my-4 space-y-2 pl-0 ${className}`
+              : `my-4 ml-5 list-disc space-y-1.5 marker:text-primary-400 dark:marker:text-primary-300 ${className}`
+          }
+        >
           {children}
         </ul>
-      </div>
-    ),
-    ol: ({ children }) => (
-      <div className="my-4 rounded-lg border-2 border-dashed border-secondary-400 dark:border-secondary-300 p-3">
-        <ol className="ml-2 list-decimal list-inside">
-          {children}
-        </ol>
-      </div>
-    ),
-    li: ({ children }) => (
-      <li className="leading-relaxed marker:text-primary-400 dark:marker:text-primary-300 marker:font-medium list-outside pl-1 ml-2">
+      )
+    },
+    ol: ({ children, className = '', ...props }) => (
+      <ol
+        {...props}
+        className={`my-4 ml-5 list-decimal space-y-1.5 marker:font-semibold marker:text-secondary-500 dark:marker:text-secondary-300 ${className}`}
+      >
         {children}
-      </li>
+      </ol>
     ),
+    li: ({ children, className = '', ...props }) => {
+      const isTaskItem = hasToken(className, 'task-list-item')
+
+      return (
+        <li
+          {...props}
+          className={
+            isTaskItem
+              ? `flex items-start gap-2 rounded-md bg-primary-300/5 px-3 py-2 leading-relaxed dark:bg-primary-200/5 ${className}`
+              : `pl-1 leading-relaxed marker:font-medium marker:text-primary-400 dark:marker:text-primary-300 ${className}`
+          }
+        >
+          {children}
+        </li>
+      )
+    },
 
     // Link related
     a: ({
@@ -256,27 +302,23 @@ const createMarkdownComponents = (translation: Translation, autoSlug: boolean = 
 
       if (isFootnoteRef) {
         return (
-          <a
+          <MarkdownFootnoteReference
             href={href}
-            className={`mx-0.5 inline-flex min-h-5 min-w-5 items-center justify-center rounded-full bg-primary-300/20 px-1.5 text-xs font-semibold text-primary-500 transition-colors hover:bg-primary-300/35 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-300 dark:bg-primary-200/15 dark:text-primary-200 dark:hover:bg-primary-200/25 ${className ?? ''}`}
-            aria-label={`Jump to footnote ${children?.toString() ?? ''}`}
+            className={className}
             {...props}
           >
             {children}
-          </a>
+          </MarkdownFootnoteReference>
         )
       }
 
       if (isFootnoteBackref) {
         return (
-          <a
+          <MarkdownFootnoteBackReference
             href={href}
-            className={`ml-2 inline-flex min-h-6 min-w-6 items-center justify-center rounded-full text-primary transition-colors hover:bg-primary-300/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-300 dark:hover:bg-primary-200/15 ${className ?? ''}`}
-            aria-label="Back to footnote reference"
+            className={className}
             {...props}
-          >
-            {children}
-          </a>
+          />
         )
       }
 
@@ -445,11 +487,6 @@ const createMarkdownComponents = (translation: Translation, autoSlug: boolean = 
         >
           <div
             className={[
-              '[&>div]:!my-3',
-              '[&>div]:!rounded-none',
-              '[&>div]:!border-0',
-              '[&>div]:!p-0',
-              '[&>div]:!shadow-none',
               '[&_ol]:!ml-5',
               '[&_ol]:!list-decimal',
               '[&_li]:!my-2',

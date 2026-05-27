@@ -1,5 +1,16 @@
-import type { CSSProperties } from 'react'
+'use client'
+
+import type { CSSProperties, KeyboardEvent } from 'react'
+import { X, ZoomIn } from 'lucide-react'
+import { useEffect, useId, useState } from 'react'
 import { CustomImage } from '@/components/ui'
+
+/**
+ * Markdown image renderer with Discourse-style layout metadata.
+ *
+ * Alt text may include a metadata suffix, for example:
+ * `![Alt text|640x360, wide](/image.jpg)`.
+ */
 
 type ImageLayout = 'center' | 'full' | 'left' | 'right' | 'thumbnail' | 'wide'
 
@@ -89,7 +100,7 @@ const getWrapperClassName = (layout: ImageLayout): string => {
 
 const getImageClassName = (layout: ImageLayout): string => {
   const baseClassName
-    = 'relative h-auto max-h-[500px] max-w-full rounded-xs object-contain shadow-md lg:max-h-[700px] xl:max-h-[800px]'
+    = 'relative h-auto max-h-[500px] max-w-full rounded-md object-contain shadow-md transition duration-200 group-hover/image:scale-[1.01] group-hover/image:shadow-lg lg:max-h-[700px] xl:max-h-[800px]'
 
   if (layout === 'thumbnail') {
     return `${baseClassName} w-full min-w-0`
@@ -100,6 +111,17 @@ const getImageClassName = (layout: ImageLayout): string => {
   }
 
   return `${baseClassName} mx-auto w-auto min-w-[200px] lg:min-w-[300px] xl:min-w-[400px]`
+}
+
+const getButtonClassName = (layout: ImageLayout): string => {
+  const baseClassName
+    = 'group/image relative inline-flex max-w-full cursor-zoom-in overflow-hidden rounded-md align-middle outline-none focus-visible:ring-2 focus-visible:ring-primary-300 focus-visible:ring-offset-2 focus-visible:ring-offset-background'
+
+  if (layout === 'full' || layout === 'wide') {
+    return `${baseClassName} w-full justify-center`
+  }
+
+  return `${baseClassName} justify-center`
 }
 
 const getWrapperStyle = (meta: ImageMeta): CSSProperties | undefined => {
@@ -117,20 +139,115 @@ export function MarkdownImage({
   src = '',
 }: MarkdownImageProps) {
   const meta = parseImageMeta(alt)
+  const imageSrc = typeof src === 'string' ? src : ''
+  const dialogTitleId = useId()
+  const [isOpen, setIsOpen] = useState(false)
+  const showCaption = meta.alt !== DEFAULT_IMAGE_META.alt
+
+  useEffect(() => {
+    if (!isOpen) {
+      return
+    }
+
+    const handleKeyDown = (event: globalThis.KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setIsOpen(false)
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [isOpen])
+
+  const handleImageKeyDown = (event: KeyboardEvent<HTMLButtonElement>) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault()
+      setIsOpen(true)
+    }
+  }
 
   return (
     <span
       className={getWrapperClassName(meta.layout)}
+      data-markdown-image=""
+      data-markdown-image-layout={meta.layout}
+      role="figure"
+      aria-label={showCaption ? meta.alt : undefined}
       style={getWrapperStyle(meta)}
     >
-      <CustomImage
-        src={typeof src === 'string' ? src : ''}
-        alt={meta.alt}
-        width={meta.width}
-        height={meta.height}
-        priority={false}
-        className={getImageClassName(meta.layout)}
-      />
+      <button
+        type="button"
+        className={getButtonClassName(meta.layout)}
+        aria-label={`Open image preview: ${meta.alt}`}
+        onClick={() => setIsOpen(true)}
+        onKeyDown={handleImageKeyDown}
+      >
+        <CustomImage
+          src={imageSrc}
+          alt={meta.alt}
+          width={meta.width}
+          height={meta.height}
+          priority={false}
+          className={getImageClassName(meta.layout)}
+        />
+        <span
+          className="absolute right-2 top-2 inline-flex h-8 w-8 items-center justify-center rounded-full bg-black/55 text-white opacity-0 shadow-sm transition-opacity group-hover/image:opacity-100 group-focus-visible/image:opacity-100"
+          aria-hidden="true"
+        >
+          <ZoomIn className="h-4 w-4" />
+        </span>
+      </button>
+
+      {showCaption && (
+        <span className="mt-2 block text-center text-sm leading-relaxed text-gray-500 dark:text-gray-400">
+          {meta.alt}
+        </span>
+      )}
+
+      {isOpen && (
+        <span
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm sm:p-6"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby={dialogTitleId}
+          onClick={() => setIsOpen(false)}
+        >
+          <span className="relative flex max-h-full w-full max-w-6xl flex-col items-center gap-3">
+            <span id={dialogTitleId} className="sr-only">
+              Image preview:
+              {' '}
+              {meta.alt}
+            </span>
+            <button
+              type="button"
+              className="absolute right-2 top-2 z-10 inline-flex h-10 w-10 items-center justify-center rounded-full bg-black/65 text-white transition-colors hover:bg-black/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+              aria-label="Close image preview"
+              onClick={() => setIsOpen(false)}
+            >
+              <X className="h-5 w-5" aria-hidden="true" />
+            </button>
+            <span
+              className="flex max-h-[85vh] max-w-full items-center justify-center"
+              onClick={event => event.stopPropagation()}
+            >
+              <CustomImage
+                src={imageSrc}
+                alt={meta.alt}
+                width={meta.width}
+                height={meta.height}
+                priority={false}
+                className="max-h-[85vh] max-w-full rounded-md object-contain shadow-2xl"
+              />
+            </span>
+            {showCaption && (
+              <span className="max-w-3xl text-center text-sm leading-relaxed text-white/85">
+                {meta.alt}
+              </span>
+            )}
+          </span>
+        </span>
+      )}
     </span>
   )
 }

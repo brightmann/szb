@@ -34,6 +34,8 @@ export const EXTENDED_MARKDOWN_ADMONITION_KINDS = [
 export type ExtendedMarkdownAdmonitionKind
   = typeof EXTENDED_MARKDOWN_ADMONITION_KINDS[number]
 
+export type ExtendedMarkdownGalleryMode = 'carousel' | 'grid'
+
 /** Inline spoiler content written as `[spoiler]hidden[/spoiler]`. */
 export interface ExtendedMarkdownSpoiler {
   type: 'extendedMarkdownSpoiler'
@@ -57,6 +59,18 @@ export interface ExtendedMarkdownAdmonition {
     {
       'data-admonition-kind': ExtendedMarkdownAdmonitionKind
       'data-admonition-title': string
+    }
+  >
+}
+
+/** Discourse-style image gallery written with `[grid]` or carousel grid tags. */
+export interface ExtendedMarkdownImageGallery {
+  type: 'extendedMarkdownImageGallery'
+  children: RootContent[]
+  data: HtmlNodeData<
+    'div',
+    {
+      'data-gallery-mode': ExtendedMarkdownGalleryMode
     }
   >
 }
@@ -126,5 +140,6 @@ declare module 'mdast' {
   interface RootContentMap {
     extendedMarkdownDetails: ExtendedMarkdownDetails
     extendedMarkdownAdmonition: ExtendedMarkdownAdmonition
+    extendedMarkdownImageGallery: ExtendedMarkdownImageGallery
   }
 }

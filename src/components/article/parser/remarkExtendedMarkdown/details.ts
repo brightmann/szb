@@ -22,6 +22,7 @@ export const FLOW_PARENT_TYPES: ReadonlySet<string> = new Set([
   'blockquote',
   'extendedMarkdownAdmonition',
   'extendedMarkdownDetails',
+  'extendedMarkdownImageGallery',
   'listItem',
 ])
 

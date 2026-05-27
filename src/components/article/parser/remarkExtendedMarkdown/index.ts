@@ -10,6 +10,7 @@ import {
   FLOW_PARENT_TYPES,
   transformExtendedDetails,
 } from './details'
+import { transformExtendedGalleries } from './gallery'
 import {
   transformInlineFormats,
 } from './inlineFormat'
@@ -37,7 +38,9 @@ const remarkExtendedMarkdown = () => {
       ) {
         const parent = node as FlowParent
         parent.children = transformExtendedAdmonitions(
-          transformExtendedDetails(parent.children),
+          transformExtendedDetails(
+            transformExtendedGalleries(parent.children),
+          ),
         )
       }
     })
@@ -64,6 +67,7 @@ export {
   transformAbbreviations,
   transformExtendedAdmonitions,
   transformExtendedDetails,
+  transformExtendedGalleries,
   transformInlineFormats,
   transformInlineSpoilers,
   transformSmartPunctuation,
