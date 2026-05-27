@@ -3,7 +3,7 @@ import type { FlowParent, PhrasingParent } from './types'
 import { visit } from 'unist-util-visit'
 import {
   FLOW_PARENT_TYPES,
-  transformDiscourseDetails,
+  transformExtendedDetails,
 } from './details'
 import {
   transformInlineFormats,
@@ -13,7 +13,13 @@ import {
   transformInlineSpoilers,
 } from './spoiler'
 
-const remarkDiscourse = () => {
+/**
+ * Remark plugin for project-local Markdown extensions.
+ *
+ * This plugin keeps non-standard Markdown support in one mdast pass before
+ * `react-markdown` converts nodes to React components.
+ */
+const remarkExtendedMarkdown = () => {
   return (tree: Root) => {
     visit(tree, (node) => {
       if (
@@ -22,7 +28,7 @@ const remarkDiscourse = () => {
         && Array.isArray(node.children)
       ) {
         const parent = node as FlowParent
-        parent.children = transformDiscourseDetails(parent.children)
+        parent.children = transformExtendedDetails(parent.children)
       }
     })
 
@@ -42,9 +48,9 @@ const remarkDiscourse = () => {
 }
 
 export {
-  transformDiscourseDetails,
+  transformExtendedDetails,
   transformInlineFormats,
   transformInlineSpoilers,
 }
 
-export default remarkDiscourse
+export default remarkExtendedMarkdown

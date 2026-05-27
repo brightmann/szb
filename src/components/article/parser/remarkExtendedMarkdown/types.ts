@@ -3,77 +3,70 @@ import type {
   RootContent,
 } from 'mdast'
 
-export interface DiscourseSpoiler {
-  type: 'discourseSpoiler'
-  children: PhrasingContent[]
-  data: {
-    hName: 'span'
-    hProperties: {
-      className: string
-    }
+/**
+ * Custom mdast node definitions emitted by the local extended Markdown plugin.
+ *
+ * Each node uses `data.hName` and `data.hProperties` so `react-markdown`
+ * can render it through the normal component map without a separate rehype
+ * bridge.
+ */
+
+interface HtmlNodeData<TagName extends string> {
+  hName: TagName
+  hProperties: {
+    className: string
   }
 }
 
-export interface DiscourseDetails {
-  type: 'discourseDetails'
+/** Inline spoiler content written as `[spoiler]hidden[/spoiler]`. */
+export interface ExtendedMarkdownSpoiler {
+  type: 'extendedMarkdownSpoiler'
+  children: PhrasingContent[]
+  data: HtmlNodeData<'span'>
+}
+
+/** Block disclosure content written with Discourse-style `[details]` tags. */
+export interface ExtendedMarkdownDetails {
+  type: 'extendedMarkdownDetails'
   children: RootContent[]
-  data: {
-    hName: 'details'
-    hProperties: {
-      className: string
-    }
-  }
+  data: HtmlNodeData<'details'>
 }
 
-export interface DiscourseSummary {
-  type: 'discourseSummary'
+/** Summary node injected as the first child of extended details blocks. */
+export interface ExtendedMarkdownSummary {
+  type: 'extendedMarkdownSummary'
   children: PhrasingContent[]
-  data: {
-    hName: 'summary'
-    hProperties: {
-      className: string
-    }
-  }
+  data: HtmlNodeData<'summary'>
 }
 
-export interface DiscourseMark {
-  type: 'discourseMark'
+/** Highlight content written as `==marked==`. */
+export interface ExtendedMarkdownMark {
+  type: 'extendedMarkdownMark'
   children: PhrasingContent[]
-  data: {
-    hName: 'mark'
-    hProperties: {
-      className: string
-    }
-  }
+  data: HtmlNodeData<'mark'>
 }
 
-export interface DiscourseSub {
-  type: 'discourseSub'
+/** Subscript content written as `~sub~`. */
+export interface ExtendedMarkdownSub {
+  type: 'extendedMarkdownSub'
   children: PhrasingContent[]
-  data: {
-    hName: 'sub'
-    hProperties: {
-      className: string
-    }
-  }
+  data: HtmlNodeData<'sub'>
 }
 
-export interface DiscourseSup {
-  type: 'discourseSup'
+/** Superscript content written as `^sup^`. */
+export interface ExtendedMarkdownSup {
+  type: 'extendedMarkdownSup'
   children: PhrasingContent[]
-  data: {
-    hName: 'sup'
-    hProperties: {
-      className: string
-    }
-  }
+  data: HtmlNodeData<'sup'>
 }
 
+/** Minimal mdast parent shape for nodes that can contain inline phrasing. */
 export interface PhrasingParent {
   type: string
   children: PhrasingContent[]
 }
 
+/** Minimal mdast parent shape for nodes that can contain block content. */
 export interface FlowParent {
   type: string
   children: RootContent[]
@@ -81,14 +74,14 @@ export interface FlowParent {
 
 declare module 'mdast' {
   interface PhrasingContentMap {
-    discourseSpoiler: DiscourseSpoiler
-    discourseSummary: DiscourseSummary
-    discourseMark: DiscourseMark
-    discourseSub: DiscourseSub
-    discourseSup: DiscourseSup
+    extendedMarkdownSpoiler: ExtendedMarkdownSpoiler
+    extendedMarkdownSummary: ExtendedMarkdownSummary
+    extendedMarkdownMark: ExtendedMarkdownMark
+    extendedMarkdownSub: ExtendedMarkdownSub
+    extendedMarkdownSup: ExtendedMarkdownSup
   }
 
   interface RootContentMap {
-    discourseDetails: DiscourseDetails
+    extendedMarkdownDetails: ExtendedMarkdownDetails
   }
 }

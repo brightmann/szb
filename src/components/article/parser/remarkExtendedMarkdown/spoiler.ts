@@ -1,10 +1,14 @@
 import type { PhrasingContent } from 'mdast'
-import type { DiscourseSpoiler, PhrasingParent } from './types'
+import type { ExtendedMarkdownSpoiler, PhrasingParent } from './types'
 import { createTextNode } from './utils'
+
+/**
+ * Converts Discourse-style inline spoiler tags into a focusable spoiler span.
+ */
 
 const SPOILER_MARKER_RE = /(\[spoiler\]|\[\/spoiler\])/i
 
-export const PHRASING_PARENT_TYPES = new Set([
+export const PHRASING_PARENT_TYPES: ReadonlySet<string> = new Set([
   'paragraph',
   'heading',
   'emphasis',
@@ -12,13 +16,13 @@ export const PHRASING_PARENT_TYPES = new Set([
   'delete',
   'link',
   'tableCell',
-  'discourseSummary',
+  'extendedMarkdownSummary',
 ])
 
 const createSpoilerNode = (
   children: PhrasingContent[],
-): DiscourseSpoiler => ({
-  type: 'discourseSpoiler',
+): ExtendedMarkdownSpoiler => ({
+  type: 'extendedMarkdownSpoiler',
   data: {
     hName: 'span',
     hProperties: {
@@ -28,6 +32,7 @@ const createSpoilerNode = (
   children,
 })
 
+/** Transform complete `[spoiler]` pairs and preserve malformed markers. */
 export const transformInlineSpoilers = (parent: PhrasingParent) => {
   const nextChildren: PhrasingContent[] = []
   let spoilerChildren: PhrasingContent[] | null = null

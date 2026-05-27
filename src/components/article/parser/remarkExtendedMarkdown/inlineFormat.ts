@@ -1,11 +1,19 @@
 import type { PhrasingContent } from 'mdast'
 import type {
-  DiscourseMark,
-  DiscourseSub,
-  DiscourseSup,
+  ExtendedMarkdownMark,
+  ExtendedMarkdownSub,
+  ExtendedMarkdownSup,
   PhrasingParent,
 } from './types'
 import { createTextNode } from './utils'
+
+/**
+ * Parses compact inline formatting syntax that is common in forums and wikis.
+ *
+ * The transform intentionally operates on mdast children instead of raw source
+ * text so markers can wrap existing inline nodes, for example
+ * `==**important**==`.
+ */
 
 type InlineFormatKind = 'mark' | 'sub' | 'sup'
 
@@ -37,10 +45,10 @@ const INLINE_FORMAT_SPECS: InlineFormatSpec[] = [
 const createInlineFormatNode = (
   kind: InlineFormatKind,
   children: PhrasingContent[],
-): DiscourseMark | DiscourseSub | DiscourseSup => {
+): ExtendedMarkdownMark | ExtendedMarkdownSub | ExtendedMarkdownSup => {
   if (kind === 'mark') {
     return {
-      type: 'discourseMark',
+      type: 'extendedMarkdownMark',
       data: {
         hName: 'mark',
         hProperties: {
@@ -53,7 +61,7 @@ const createInlineFormatNode = (
 
   if (kind === 'sub') {
     return {
-      type: 'discourseSub',
+      type: 'extendedMarkdownSub',
       data: {
         hName: 'sub',
         hProperties: {
@@ -65,7 +73,7 @@ const createInlineFormatNode = (
   }
 
   return {
-    type: 'discourseSup',
+    type: 'extendedMarkdownSup',
     data: {
       hName: 'sup',
       hProperties: {

@@ -1,23 +1,30 @@
 import type { RootContent } from 'mdast'
 import type {
-  DiscourseDetails,
-  DiscourseSummary,
+  ExtendedMarkdownDetails,
+  ExtendedMarkdownSummary,
 } from './types'
 import { getParagraphText } from './utils'
+
+/**
+ * Converts Discourse-style disclosure blocks into native `<details>` nodes.
+ *
+ * Supported syntax:
+ * `[details="Title"] ... [/details]`
+ */
 
 const DETAILS_OPEN_RE
   = /^\s*\[details(?:=(?:"([^"]*)"|'([^']*)'|([^\]]*)))?\]\s*$/i
 
 const DETAILS_CLOSE_RE = /^\s*\[\/details\]\s*$/i
 
-export const FLOW_PARENT_TYPES = new Set([
+export const FLOW_PARENT_TYPES: ReadonlySet<string> = new Set([
   'root',
   'blockquote',
   'listItem',
 ])
 
-const createSummaryNode = (title: string): DiscourseSummary => ({
-  type: 'discourseSummary',
+const createSummaryNode = (title: string): ExtendedMarkdownSummary => ({
+  type: 'extendedMarkdownSummary',
   data: {
     hName: 'summary',
     hProperties: {
@@ -35,8 +42,8 @@ const createSummaryNode = (title: string): DiscourseSummary => ({
 const createDetailsNode = (
   title: string,
   children: RootContent[],
-): DiscourseDetails => ({
-  type: 'discourseDetails',
+): ExtendedMarkdownDetails => ({
+  type: 'extendedMarkdownDetails',
   data: {
     hName: 'details',
     hProperties: {
@@ -49,6 +56,7 @@ const createDetailsNode = (
   ],
 })
 
+/** Extract the optional title from a `[details]` opener paragraph. */
 const parseDetailsOpenTitle = (
   node: RootContent,
 ): string | null => {
@@ -69,13 +77,15 @@ const parseDetailsOpenTitle = (
   return title.trim() === '' ? 'Details' : title.trim()
 }
 
+/** Detect a `[/details]` closer paragraph. */
 const isDetailsClose = (node: RootContent): boolean => {
   const text = getParagraphText(node)
 
   return text != null && DETAILS_CLOSE_RE.test(text)
 }
 
-export const transformDiscourseDetails = (
+/** Transform complete details blocks and leave malformed blocks untouched. */
+export const transformExtendedDetails = (
   children: RootContent[],
 ): RootContent[] => {
   const nextChildren: RootContent[] = []
@@ -128,7 +138,7 @@ export const transformDiscourseDetails = (
     nextChildren.push(
       createDetailsNode(
         title,
-        transformDiscourseDetails(detailsChildren),
+        transformExtendedDetails(detailsChildren),
       ),
     )
 
