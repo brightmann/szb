@@ -5,7 +5,8 @@ import { isValidElement } from 'react'
 import { CustomImage, SakuraIcon } from '@/components/ui'
 import { generateHierarchicalSlug, slugPrefix } from '@/services/utils'
 import { KEY_ICONS } from './keyboardIcons'
-import SpoilerText from './Spoiler/SpoilerText'
+import { MarkdownDetails, MarkdownSummary } from './MarkdownDetails'
+import { SpoilerText } from './remarkDiscourse/components'
 
 const CodeBlock = dynamic(async () => import('./codeBlock/renderCodeBlock'))
 const FriendLinks = dynamic(async () => import('./FriendLinks'))
@@ -129,16 +130,9 @@ const createMarkdownComponents = (translation: Translation, autoSlug: boolean = 
         </blockquote>
       </div>
     ),
-    details: ({ children }) => (
-      <details className="cursor-pointer rounded-lg border border-gray-300 bg-background p-3 open:bg-background">
-        {children}
-      </details>
-    ),
-    summary: ({ children }) => (
-      <summary className="font-semibold text-primary cursor-pointer">
-        {children}
-      </summary>
-    ),
+    details: MarkdownDetails,
+    summary: MarkdownSummary,
+
     mark: ({ children }) => (
       <mark className="bg-yellow-200 px-1 py-0.5 rounded">
         {children}

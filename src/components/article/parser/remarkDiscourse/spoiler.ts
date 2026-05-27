@@ -1,31 +1,10 @@
-import type { PhrasingContent, Root, Text } from 'mdast'
-import { visit } from 'unist-util-visit'
+import type { PhrasingContent } from 'mdast'
+import type { DiscourseSpoiler, PhrasingParent } from './types'
+import { createTextNode } from './utils'
 
-interface DiscourseSpoiler {
-  type: 'discourseSpoiler'
-  children: PhrasingContent[]
-  data: {
-    hName: 'span'
-    hProperties: {
-      className: string
-    }
-  }
-}
+const SPOILER_MARKER_RE = /(\[spoiler\]|\[\/spoiler\])/i
 
-declare module 'mdast' {
-  interface PhrasingContentMap {
-    discourseSpoiler: DiscourseSpoiler
-  }
-}
-
-interface PhrasingParent {
-  type: string
-  children: PhrasingContent[]
-}
-
-const SPOILER_MARKER_RE = /(\[spoiler\]|\[\/spoiler\])/gi
-
-const PHRASING_PARENT_TYPES = new Set([
+export const PHRASING_PARENT_TYPES = new Set([
   'paragraph',
   'heading',
   'emphasis',
@@ -33,12 +12,8 @@ const PHRASING_PARENT_TYPES = new Set([
   'delete',
   'link',
   'tableCell',
+  'discourseSummary',
 ])
-
-const createTextNode = (value: string): Text => ({
-  type: 'text',
-  value,
-})
 
 const createSpoilerNode = (
   children: PhrasingContent[],
@@ -53,7 +28,7 @@ const createSpoilerNode = (
   children,
 })
 
-const transformInlineSpoilers = (parent: PhrasingParent) => {
+export const transformInlineSpoilers = (parent: PhrasingParent) => {
   const nextChildren: PhrasingContent[] = []
   let spoilerChildren: PhrasingContent[] | null = null
   let changed = false
@@ -116,7 +91,6 @@ const transformInlineSpoilers = (parent: PhrasingParent) => {
     }
   }
 
-  // Preserve unmatched opening tag instead of eating content.
   if (spoilerChildren !== null) {
     nextChildren.push(createTextNode('[spoiler]'))
     nextChildren.push(...spoilerChildren)
@@ -126,19 +100,3 @@ const transformInlineSpoilers = (parent: PhrasingParent) => {
     parent.children = nextChildren
   }
 }
-
-const remarkDiscourseSpoiler = () => {
-  return (tree: Root) => {
-    visit(tree, (node) => {
-      if (
-        PHRASING_PARENT_TYPES.has(node.type)
-        && 'children' in node
-        && Array.isArray(node.children)
-      ) {
-        transformInlineSpoilers(node as PhrasingParent)
-      }
-    })
-  }
-}
-
-export default remarkDiscourseSpoiler

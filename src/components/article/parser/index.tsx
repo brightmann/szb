@@ -7,7 +7,7 @@ import remarkGemoji from 'remark-gemoji'
 import remarkGfm from 'remark-gfm'
 import remarkMath from 'remark-math'
 import createMarkdownComponents from './markdownComponents'
-import remarkDiscourseSpoiler from './Spoiler/remarkDiscourseSpoiler'
+import remarkDiscourse from './remarkDiscourse'
 
 import 'katex/dist/katex.min.css'
 
@@ -29,7 +29,7 @@ const MarkdownContent = async ({ post, translation }: MarkdownContentProps) => {
           remarkGfm,
           remarkMath,
           remarkGemoji,
-          remarkDiscourseSpoiler,
+          remarkDiscourse,
         ]}
         rehypePlugins={[rehypeRaw, rehypeKatex]}
         components={markdownComponents}

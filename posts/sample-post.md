@@ -67,8 +67,22 @@ A note [^1] and another note [^2]
 
 <details>
 <summary>点击展开</summary>
-这里是可折叠的内容。
+
+这里是默认 web 原生版本可折叠的内容。
+
+- 支持列表
+- 支持 **Markdown**
+
 </details>
+
+[details="点击展开"]
+
+这里是 Discourse 版本可折叠的内容。
+
+- 支持列表
+- 支持 **Markdown**
+
+[/details]
 
 ### Special Quotes
 
