@@ -2,11 +2,12 @@ import type { ReactNode } from 'react'
 import type { Components as MarkdownComponents } from 'react-markdown'
 import dynamic from 'next/dynamic'
 import { isValidElement } from 'react'
-import { CustomImage, SakuraIcon } from '@/components/ui'
+import { SakuraIcon } from '@/components/ui'
 import { generateHierarchicalSlug, slugPrefix } from '@/services/utils'
 import { KEY_ICONS } from './keyboardIcons'
 import { MarkdownAdmonition } from './MarkdownAdmonition'
 import { MarkdownDetails, MarkdownSummary } from './MarkdownDetails'
+import { MarkdownImage } from './MarkdownImage'
 import { SpoilerText } from './remarkExtendedMarkdown/components'
 
 const CodeBlock = dynamic(async () => import('./codeBlock/renderCodeBlock'))
@@ -241,17 +242,7 @@ const createMarkdownComponents = (translation: Translation, autoSlug: boolean = 
     },
 
     // Image related
-    img: ({ src: source = '', alt = 'Image', ...props }: { src?: string | Blob, alt?: string }) => (
-      <CustomImage
-        src={typeof source === 'string' ? source : ''}
-        alt={alt}
-        width={500}
-        height={700}
-        priority={false}
-        className="relative mx-auto my-6 h-auto max-h-[500px] w-auto min-w-[200px] max-w-full rounded-xs object-contain shadow-md lg:max-h-[700px] lg:min-w-[300px] xl:max-h-[800px] xl:min-w-[400px]"
-        {...(props as Record<string, unknown>)}
-      />
-    ),
+    img: MarkdownImage,
 
     // Code related
     code: ({ className, children, ...props }) => {

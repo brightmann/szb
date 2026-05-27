@@ -141,6 +141,24 @@ This is a danger callout.
 
 You may be using [Markdown Live Preview](https://markdownlivepreview.com/).
 
+## Images
+
+Discourse-style image metadata can control size and layout:
+
+```md
+![Centered sample|640x360, 75%](/images/background.jpg)
+![Left wrapped sample|320x180, left](/images/background.jpg)
+![Wide sample|wide](/images/background.jpg)
+```
+
+![Centered sample|640x360, 75%](/images/background.jpg)
+
+![Left wrapped sample|320x180, left](/images/background.jpg)
+
+This paragraph wraps around the left image on larger screens while still stacking cleanly on mobile.
+
+![Wide sample|wide](/images/background.jpg)
+
 ## Blockquotes
 
 > Markdown is a lightweight markup language with plain-text-formatting syntax, created in 2004 by John Gruber with Aaron Swartz.
