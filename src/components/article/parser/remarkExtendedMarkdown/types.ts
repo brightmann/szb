@@ -89,6 +89,18 @@ export interface ExtendedMarkdownSup {
   data: HtmlNodeData<'sup'>
 }
 
+/** Abbreviation text defined by Markdown Extra-style `*[HTML]: ...`. */
+export interface ExtendedMarkdownAbbreviation {
+  type: 'extendedMarkdownAbbreviation'
+  children: PhrasingContent[]
+  data: HtmlNodeData<
+    'abbr',
+    {
+      title: string
+    }
+  >
+}
+
 /** Minimal mdast parent shape for nodes that can contain inline phrasing. */
 export interface PhrasingParent {
   type: string
@@ -108,6 +120,7 @@ declare module 'mdast' {
     extendedMarkdownMark: ExtendedMarkdownMark
     extendedMarkdownSub: ExtendedMarkdownSub
     extendedMarkdownSup: ExtendedMarkdownSup
+    extendedMarkdownAbbreviation: ExtendedMarkdownAbbreviation
   }
 
   interface RootContentMap {

@@ -139,6 +139,16 @@ const createMarkdownComponents = (translation: Translation, autoSlug: boolean = 
         {children}
       </sub>
     ),
+    abbr: ({ children, className = '', title }) => (
+      <abbr
+        className={`cursor-help rounded-sm decoration-dotted underline-offset-4 outline-none transition-colors hover:text-primary focus-visible:ring-2 focus-visible:ring-primary-300 ${className}`}
+        title={title}
+        aria-label={title != null && title !== '' ? `${children?.toString()}: ${title}` : undefined}
+        tabIndex={0}
+      >
+        {children}
+      </abbr>
+    ),
     blockquote: ({ children }) => (
       <div className="my-3 flex justify-center">
         <blockquote className="w-[95%] rounded-md border-l-4 border-primary-300 dark:border-primary-200 bg-gray-light bg-opacity-75 py-0.5 pl-3 pr-2 italic shadow-sm transition-shadow duration-300 hover:shadow-md">

@@ -1,6 +1,10 @@
 import type { Root } from 'mdast'
 import type { FlowParent, PhrasingParent } from './types'
 import { visit } from 'unist-util-visit'
+import {
+  collectAbbreviationDefinitions,
+  transformAbbreviations,
+} from './abbreviation'
 import { transformExtendedAdmonitions } from './admonition'
 import {
   FLOW_PARENT_TYPES,
@@ -9,6 +13,7 @@ import {
 import {
   transformInlineFormats,
 } from './inlineFormat'
+import { transformSmartPunctuation } from './smartPunctuation'
 import {
   PHRASING_PARENT_TYPES,
   transformInlineSpoilers,
@@ -22,6 +27,8 @@ import {
  */
 const remarkExtendedMarkdown = () => {
   return (tree: Root) => {
+    const abbreviationDefinitions = collectAbbreviationDefinitions(tree)
+
     visit(tree, (node) => {
       if (
         FLOW_PARENT_TYPES.has(node.type)
@@ -45,16 +52,21 @@ const remarkExtendedMarkdown = () => {
 
         transformInlineSpoilers(parent)
         transformInlineFormats(parent)
+        transformAbbreviations(parent, abbreviationDefinitions)
+        transformSmartPunctuation(parent)
       }
     })
   }
 }
 
 export {
+  collectAbbreviationDefinitions,
+  transformAbbreviations,
   transformExtendedAdmonitions,
   transformExtendedDetails,
   transformInlineFormats,
   transformInlineSpoilers,
+  transformSmartPunctuation,
 }
 
 export default remarkExtendedMarkdown

@@ -52,6 +52,16 @@ Here is a kbd example: <kbd>Ctrl</kbd> + <kbd>C</kbd> and <kbd>Command</kbd> + <
 
 H~2~O, E=mc^2^
 
+HTML and CSS abbreviations expose their meaning on hover or keyboard focus.
+
+\*[HTML]: HyperText Markup Language
+
+\*[CSS]: Cascading Style Sheets
+
+Smart punctuation turns ranges like 2024--2026 into an en dash, and breaks---like this---into em dashes.
+
+Emoji shortcodes work with GitHub-style names: :wink: :cry: :sparkles:
+
 ### Notes
 
 A note [^1] and another note [^2]
