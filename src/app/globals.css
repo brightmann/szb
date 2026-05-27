@@ -25,3 +25,231 @@
     border-color: var(--color-gray-200, currentColor);
   }
 }
+
+@layer components {
+  .markdown-unordered-list,
+  .markdown-ordered-list {
+    margin-block: 1rem;
+  }
+
+  .markdown-unordered-list {
+    list-style: none;
+    padding-inline-start: 0;
+  }
+
+  .markdown-unordered-list .markdown-unordered-list,
+  .markdown-unordered-list .markdown-ordered-list,
+  .markdown-ordered-list .markdown-unordered-list,
+  .markdown-ordered-list .markdown-ordered-list {
+    margin-block: 0.45rem;
+  }
+
+  .markdown-list-item {
+    line-height: 1.75;
+  }
+
+  .markdown-unordered-list > .markdown-list-item {
+    position: relative;
+    padding-inline-start: 1.35rem;
+  }
+
+  .markdown-unordered-list > .markdown-list-item::before {
+    position: absolute;
+    inset-block-start: 0.72em;
+    inset-inline-start: 0.2rem;
+    width: 0.45rem;
+    height: 0.45rem;
+    border-radius: 999px;
+    background: color-mix(in oklab, var(--color-primary-300) 78%, transparent);
+    content: '';
+    transform: translateY(-50%);
+  }
+
+  .markdown-unordered-list .markdown-unordered-list > .markdown-list-item::before {
+    width: 0.5rem;
+    height: 0.5rem;
+    border: 2px solid color-mix(in oklab, var(--color-secondary-400) 78%, transparent);
+    background: transparent;
+  }
+
+  .markdown-unordered-list .markdown-unordered-list .markdown-unordered-list > .markdown-list-item::before {
+    width: 0.42rem;
+    height: 0.42rem;
+    border-radius: 2px;
+    background: color-mix(in oklab, var(--color-accent-300) 76%, transparent);
+    transform: translateY(-50%) rotate(45deg);
+  }
+
+  .markdown-ordered-list {
+    list-style: none;
+    padding-inline-start: 0;
+    counter-reset: markdown-ordered;
+  }
+
+  .markdown-ordered-list > .markdown-list-item {
+    position: relative;
+    padding-inline-start: 2.65rem;
+    counter-increment: markdown-ordered;
+  }
+
+  .markdown-ordered-list > .markdown-list-item::before {
+    position: absolute;
+    inset-block-start: 0.18rem;
+    inset-inline-start: 0;
+    min-width: 2rem;
+    color: color-mix(in oklab, var(--color-secondary-500) 82%, transparent);
+    content: counters(markdown-ordered, '.') '.';
+    font-size: 0.9em;
+    font-weight: 700;
+    line-height: 1.7;
+    text-align: end;
+  }
+
+  .markdown-task-list {
+    list-style: none;
+    padding-inline-start: 0;
+  }
+
+  .markdown-task-item {
+    display: flex;
+    gap: 0.55rem;
+    align-items: flex-start;
+    padding: 0.45rem 0.65rem;
+    border-radius: 0.375rem;
+    background: color-mix(in oklab, var(--color-primary-300) 7%, transparent);
+  }
+
+  .markdown-tooltip-surface {
+    opacity: 0;
+    transform: translate3d(-50%, 0.35rem, 0) scale(0.96);
+    transform-origin: bottom center;
+    transition:
+      opacity 160ms ease,
+      transform 180ms cubic-bezier(0.2, 0.8, 0.2, 1);
+    will-change: opacity, transform;
+  }
+
+  .group\/abbr:hover .markdown-tooltip-surface,
+  .group\/abbr:focus-within .markdown-tooltip-surface,
+  .group\/footnote:hover .markdown-tooltip-surface,
+  .group\/footnote:focus-within .markdown-tooltip-surface {
+    opacity: 1;
+    transform: translate3d(-50%, 0, 0) scale(1);
+  }
+
+  .markdown-gallery-grid {
+    column-count: 1;
+    column-gap: 0.75rem;
+  }
+
+  .markdown-gallery-grid > .markdown-gallery-item {
+    display: inline-block;
+    width: 100%;
+    margin-block-end: 0.75rem;
+    break-inside: avoid;
+  }
+
+  .markdown-gallery-grid [data-markdown-image] {
+    margin-block: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  .markdown-gallery-grid [data-markdown-image] > button,
+  .markdown-gallery-carousel [data-markdown-image] > button {
+    width: 100% !important;
+    justify-content: center !important;
+  }
+
+  .markdown-gallery-grid [data-markdown-image] [data-nimg],
+  .markdown-gallery-carousel [data-markdown-image] [data-nimg] {
+    width: 100% !important;
+    height: auto !important;
+    min-width: 0 !important;
+    object-fit: cover !important;
+  }
+
+  .markdown-gallery-grid [data-markdown-image] [data-nimg] {
+    max-height: none !important;
+  }
+
+  .markdown-gallery-carousel {
+    position: relative;
+    display: grid;
+    place-items: center;
+    min-height: min(64vh, 36rem);
+    padding: 3rem 0 4.25rem;
+  }
+
+  .markdown-gallery-carousel-track {
+    display: grid;
+    width: min(100%, 34rem);
+    min-height: min(54vh, 30rem);
+    place-items: center;
+  }
+
+  .markdown-gallery-carousel-item {
+    grid-area: 1 / 1;
+    width: 100%;
+    opacity: 0;
+    transform: translate3d(0, 0.75rem, 0) scale(0.965);
+    transition:
+      opacity 220ms ease,
+      transform 280ms cubic-bezier(0.2, 0.8, 0.2, 1);
+    pointer-events: none;
+  }
+
+  .markdown-gallery-carousel-item[data-active='true'] {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+    pointer-events: auto;
+  }
+
+  .markdown-gallery-carousel-item [data-markdown-image] {
+    margin-block: 0 !important;
+  }
+
+  .markdown-gallery-carousel-item [data-markdown-image] [data-nimg] {
+    max-height: min(54vh, 30rem) !important;
+    border-radius: 0.75rem;
+  }
+
+  .markdown-gallery-carousel-controls {
+    position: absolute;
+    inset-block-end: 1rem;
+    inset-inline: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1.25rem;
+  }
+
+  .markdown-gallery-carousel-dots {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    border-radius: 999px;
+    background: rgb(255 255 255 / 11%);
+    backdrop-filter: blur(12px);
+  }
+
+  @media (min-width: 640px) {
+    .markdown-gallery-grid {
+      column-count: 2;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .markdown-gallery-grid {
+      column-count: 3;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .markdown-tooltip-surface,
+    .markdown-gallery-carousel-item {
+      transition: none;
+    }
+  }
+}

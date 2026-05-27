@@ -7,7 +7,7 @@ import type {
   ReactNode,
 } from 'react'
 import { CornerUpLeft } from 'lucide-react'
-import { useId, useState } from 'react'
+import { useEffect, useId, useState } from 'react'
 
 /**
  * Inline tooltip primitives for Markdown-only affordances.
@@ -97,9 +97,9 @@ export function MarkdownAbbreviation({
         <span
           id={tooltipId}
           className={cx(
+            'markdown-tooltip-surface',
             'pointer-events-none absolute bottom-full left-1/2 z-40 mb-2 w-max max-w-64 -translate-x-1/2 rounded-md border border-primary-300/40',
-            'bg-background px-3 py-2 text-xs font-medium leading-relaxed text-gray-800 opacity-0 shadow-lg shadow-primary-950/10 transition-opacity duration-100',
-            'group-hover/abbr:opacity-100 group-focus-within/abbr:opacity-100',
+            'bg-background px-3 py-2 text-xs font-medium leading-relaxed text-gray-800 shadow-lg shadow-primary-950/10',
             'dark:border-primary-200/40 dark:text-gray-100',
           )}
           role="tooltip"
@@ -121,6 +121,12 @@ export function MarkdownFootnoteReference({
   const label = children?.toString() ?? ''
   const tooltipId = useId()
   const [preview, setPreview] = useState('')
+
+  useEffect(() => {
+    if (href.startsWith('#')) {
+      setPreview(getFootnoteText(href))
+    }
+  }, [href])
 
   const updatePreview = () => {
     setPreview(href.startsWith('#') ? getFootnoteText(href) : '')
@@ -157,20 +163,18 @@ export function MarkdownFootnoteReference({
         {children}
       </a>
 
-      {preview !== '' && (
-        <span
-          id={tooltipId}
-          className={cx(
-            'pointer-events-none absolute bottom-full left-1/2 z-40 mb-2 w-max max-w-72 -translate-x-1/2 rounded-md border border-primary-300/40',
-            'bg-background px-3 py-2 text-left text-xs font-medium leading-relaxed text-gray-800 opacity-0 shadow-lg shadow-primary-950/10 transition-opacity duration-100',
-            'group-hover/footnote:opacity-100 group-focus-within/footnote:opacity-100',
-            'dark:border-primary-200/40 dark:text-gray-100',
-          )}
-          role="tooltip"
-        >
-          {preview}
-        </span>
-      )}
+      <span
+        id={tooltipId}
+        className={cx(
+          'markdown-tooltip-surface',
+          'pointer-events-none absolute bottom-full left-1/2 z-40 mb-2 w-max max-w-72 -translate-x-1/2 rounded-md border border-primary-300/40',
+          'bg-background px-3 py-2 text-left text-xs font-medium leading-relaxed text-gray-800 shadow-lg shadow-primary-950/10',
+          'dark:border-primary-200/40 dark:text-gray-100',
+        )}
+        role="tooltip"
+      >
+        {preview}
+      </span>
     </span>
   )
 }

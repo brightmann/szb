@@ -256,8 +256,8 @@ const createMarkdownComponents = (translation: Translation, autoSlug: boolean = 
           {...props}
           className={
             isTaskList
-              ? `my-4 space-y-2 pl-0 ${className}`
-              : `my-4 ml-5 list-disc space-y-1.5 marker:text-primary-400 dark:marker:text-primary-300 ${className}`
+              ? `markdown-task-list my-4 space-y-2 ${className}`
+              : `markdown-unordered-list space-y-1.5 ${className}`
           }
         >
           {children}
@@ -267,7 +267,7 @@ const createMarkdownComponents = (translation: Translation, autoSlug: boolean = 
     ol: ({ children, className = '', ...props }) => (
       <ol
         {...props}
-        className={`my-4 ml-5 list-decimal space-y-1.5 marker:font-semibold marker:text-secondary-500 dark:marker:text-secondary-300 ${className}`}
+        className={`markdown-ordered-list space-y-1.5 ${className}`}
       >
         {children}
       </ol>
@@ -280,8 +280,8 @@ const createMarkdownComponents = (translation: Translation, autoSlug: boolean = 
           {...props}
           className={
             isTaskItem
-              ? `flex items-start gap-2 rounded-md bg-primary-300/5 px-3 py-2 leading-relaxed dark:bg-primary-200/5 ${className}`
-              : `pl-1 leading-relaxed marker:font-medium marker:text-primary-400 dark:marker:text-primary-300 ${className}`
+              ? `markdown-task-item leading-relaxed ${className}`
+              : `markdown-list-item ${className}`
           }
         >
           {children}

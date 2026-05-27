@@ -2,7 +2,8 @@
 
 import type { CSSProperties, KeyboardEvent } from 'react'
 import { X, ZoomIn } from 'lucide-react'
-import { useEffect, useId, useState } from 'react'
+import { useCallback, useEffect, useId, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { CustomImage } from '@/components/ui'
 
 /**
@@ -141,31 +142,122 @@ export function MarkdownImage({
   const meta = parseImageMeta(alt)
   const imageSrc = typeof src === 'string' ? src : ''
   const dialogTitleId = useId()
-  const [isOpen, setIsOpen] = useState(false)
+  const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const [canUsePortal, setCanUsePortal] = useState(false)
+  const [isPreviewMounted, setIsPreviewMounted] = useState(false)
+  const [isPreviewVisible, setIsPreviewVisible] = useState(false)
   const showCaption = meta.alt !== DEFAULT_IMAGE_META.alt
 
   useEffect(() => {
-    if (!isOpen) {
+    setCanUsePortal(true)
+  }, [])
+
+  const closePreview = useCallback(() => {
+    setIsPreviewVisible(false)
+
+    closeTimerRef.current = setTimeout(() => {
+      setIsPreviewMounted(false)
+    }, 220)
+  }, [])
+
+  const openPreview = () => {
+    if (closeTimerRef.current != null) {
+      clearTimeout(closeTimerRef.current)
+    }
+
+    setIsPreviewMounted(true)
+    window.requestAnimationFrame(() => setIsPreviewVisible(true))
+  }
+
+  useEffect(() => {
+    return () => {
+      if (closeTimerRef.current != null) {
+        clearTimeout(closeTimerRef.current)
+      }
+    }
+  }, [])
+
+  useEffect(() => {
+    if (!isPreviewMounted) {
       return
     }
 
     const handleKeyDown = (event: globalThis.KeyboardEvent) => {
       if (event.key === 'Escape') {
-        setIsOpen(false)
+        closePreview()
       }
     }
 
+    const previousOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
     window.addEventListener('keydown', handleKeyDown)
 
-    return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [isOpen])
+    return () => {
+      document.body.style.overflow = previousOverflow
+      window.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [closePreview, isPreviewMounted])
 
   const handleImageKeyDown = (event: KeyboardEvent<HTMLButtonElement>) => {
     if (event.key === 'Enter' || event.key === ' ') {
       event.preventDefault()
-      setIsOpen(true)
+      openPreview()
     }
   }
+
+  const previewOverlay = isPreviewMounted
+    ? (
+        <span
+          className={[
+            'fixed inset-0 z-[9999] flex min-h-dvh items-center justify-center bg-black/80 p-4 backdrop-blur-sm transition-opacity duration-200 sm:p-6',
+            isPreviewVisible ? 'opacity-100' : 'opacity-0',
+          ].join(' ')}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby={dialogTitleId}
+          onClick={closePreview}
+        >
+          <span
+            className={[
+              'relative flex max-h-full w-full max-w-6xl flex-col items-center gap-3 transition-transform duration-300 ease-out',
+              isPreviewVisible ? 'scale-100' : 'scale-95',
+            ].join(' ')}
+          >
+            <span id={dialogTitleId} className="sr-only">
+              Image preview:
+              {' '}
+              {meta.alt}
+            </span>
+            <button
+              type="button"
+              className="absolute right-2 top-2 z-10 inline-flex h-10 w-10 items-center justify-center rounded-full bg-black/65 text-white transition-colors hover:bg-black/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+              aria-label="Close image preview"
+              onClick={closePreview}
+            >
+              <X className="h-5 w-5" aria-hidden="true" />
+            </button>
+            <span
+              className="flex max-h-[85dvh] max-w-full items-center justify-center"
+              onClick={event => event.stopPropagation()}
+            >
+              <CustomImage
+                src={imageSrc}
+                alt={meta.alt}
+                width={meta.width}
+                height={meta.height}
+                priority={false}
+                className="max-h-[85dvh] max-w-full rounded-md object-contain shadow-2xl"
+              />
+            </span>
+            {showCaption && (
+              <span className="max-w-3xl text-center text-sm leading-relaxed text-white/85">
+                {meta.alt}
+              </span>
+            )}
+          </span>
+        </span>
+      )
+    : null
 
   return (
     <span
@@ -180,7 +272,7 @@ export function MarkdownImage({
         type="button"
         className={getButtonClassName(meta.layout)}
         aria-label={`Open image preview: ${meta.alt}`}
-        onClick={() => setIsOpen(true)}
+        onClick={openPreview}
         onKeyDown={handleImageKeyDown}
       >
         <CustomImage
@@ -205,49 +297,9 @@ export function MarkdownImage({
         </span>
       )}
 
-      {isOpen && (
-        <span
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm sm:p-6"
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby={dialogTitleId}
-          onClick={() => setIsOpen(false)}
-        >
-          <span className="relative flex max-h-full w-full max-w-6xl flex-col items-center gap-3">
-            <span id={dialogTitleId} className="sr-only">
-              Image preview:
-              {' '}
-              {meta.alt}
-            </span>
-            <button
-              type="button"
-              className="absolute right-2 top-2 z-10 inline-flex h-10 w-10 items-center justify-center rounded-full bg-black/65 text-white transition-colors hover:bg-black/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
-              aria-label="Close image preview"
-              onClick={() => setIsOpen(false)}
-            >
-              <X className="h-5 w-5" aria-hidden="true" />
-            </button>
-            <span
-              className="flex max-h-[85vh] max-w-full items-center justify-center"
-              onClick={event => event.stopPropagation()}
-            >
-              <CustomImage
-                src={imageSrc}
-                alt={meta.alt}
-                width={meta.width}
-                height={meta.height}
-                priority={false}
-                className="max-h-[85vh] max-w-full rounded-md object-contain shadow-2xl"
-              />
-            </span>
-            {showCaption && (
-              <span className="max-w-3xl text-center text-sm leading-relaxed text-white/85">
-                {meta.alt}
-              </span>
-            )}
-          </span>
-        </span>
-      )}
+      {canUsePortal && previewOverlay != null
+        ? createPortal(previewOverlay, document.body)
+        : null}
     </span>
   )
 }
