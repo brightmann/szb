@@ -86,8 +86,28 @@ A note [^1] and another note [^2]
 
 ### Special Quotes
 
+Use fenced admonitions for callouts:
+
+```md
+::: warning Optional title
+Content supports **Markdown**.
+:::
+```
+
+::: info
+This is an info callout.
+:::
+
 ::: tip
-This is a tip
+This is a tip with **Markdown** inside.
+:::
+
+::: warning Pay attention
+This is a warning callout that wraps on small screens and works in light and dark mode.
+:::
+
+::: danger
+This is a danger callout.
 :::
 
 ## Lists

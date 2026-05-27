@@ -20,6 +20,8 @@ const DETAILS_CLOSE_RE = /^\s*\[\/details\]\s*$/i
 export const FLOW_PARENT_TYPES: ReadonlySet<string> = new Set([
   'root',
   'blockquote',
+  'extendedMarkdownAdmonition',
+  'extendedMarkdownDetails',
   'listItem',
 ])
 

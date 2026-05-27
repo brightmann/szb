@@ -5,6 +5,7 @@ import { isValidElement } from 'react'
 import { CustomImage, SakuraIcon } from '@/components/ui'
 import { generateHierarchicalSlug, slugPrefix } from '@/services/utils'
 import { KEY_ICONS } from './keyboardIcons'
+import { MarkdownAdmonition } from './MarkdownAdmonition'
 import { MarkdownDetails, MarkdownSummary } from './MarkdownDetails'
 import { SpoilerText } from './remarkExtendedMarkdown/components'
 
@@ -145,6 +146,7 @@ const createMarkdownComponents = (translation: Translation, autoSlug: boolean = 
         </blockquote>
       </div>
     ),
+    aside: MarkdownAdmonition,
     details: MarkdownDetails,
     summary: MarkdownSummary,
 

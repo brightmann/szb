@@ -1,6 +1,7 @@
 import type { Root } from 'mdast'
 import type { FlowParent, PhrasingParent } from './types'
 import { visit } from 'unist-util-visit'
+import { transformExtendedAdmonitions } from './admonition'
 import {
   FLOW_PARENT_TYPES,
   transformExtendedDetails,
@@ -28,7 +29,9 @@ const remarkExtendedMarkdown = () => {
         && Array.isArray(node.children)
       ) {
         const parent = node as FlowParent
-        parent.children = transformExtendedDetails(parent.children)
+        parent.children = transformExtendedAdmonitions(
+          transformExtendedDetails(parent.children),
+        )
       }
     })
 
@@ -48,6 +51,7 @@ const remarkExtendedMarkdown = () => {
 }
 
 export {
+  transformExtendedAdmonitions,
   transformExtendedDetails,
   transformInlineFormats,
   transformInlineSpoilers,

@@ -11,12 +11,28 @@ import type {
  * bridge.
  */
 
-interface HtmlNodeData<TagName extends string> {
+interface HtmlNodeData<
+  TagName extends string,
+  Properties extends object = object,
+> {
   hName: TagName
   hProperties: {
     className: string
-  }
+  } & Properties
 }
+
+export const EXTENDED_MARKDOWN_ADMONITION_KINDS = [
+  'note',
+  'info',
+  'tip',
+  'success',
+  'warning',
+  'danger',
+  'caution',
+] as const
+
+export type ExtendedMarkdownAdmonitionKind
+  = typeof EXTENDED_MARKDOWN_ADMONITION_KINDS[number]
 
 /** Inline spoiler content written as `[spoiler]hidden[/spoiler]`. */
 export interface ExtendedMarkdownSpoiler {
@@ -30,6 +46,19 @@ export interface ExtendedMarkdownDetails {
   type: 'extendedMarkdownDetails'
   children: RootContent[]
   data: HtmlNodeData<'details'>
+}
+
+/** Callout content written as `::: warning Optional title ... :::`. */
+export interface ExtendedMarkdownAdmonition {
+  type: 'extendedMarkdownAdmonition'
+  children: RootContent[]
+  data: HtmlNodeData<
+    'aside',
+    {
+      'data-admonition-kind': ExtendedMarkdownAdmonitionKind
+      'data-admonition-title': string
+    }
+  >
 }
 
 /** Summary node injected as the first child of extended details blocks. */
@@ -83,5 +112,6 @@ declare module 'mdast' {
 
   interface RootContentMap {
     extendedMarkdownDetails: ExtendedMarkdownDetails
+    extendedMarkdownAdmonition: ExtendedMarkdownAdmonition
   }
 }
