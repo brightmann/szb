@@ -9,6 +9,8 @@ autoSlug: false
 
 你好，欢迎来到这里！
 
+This is [spoiler]hidden text[/spoiler].
+
 我是 **ZL Asica（Elara Liu）**，目前在美国伊利诺伊州 **Evanston**，就读于 **Northwestern University** 的 **MS in Computer Science (MSCS)**。我主要做 **HCI × Health Informatics × CSCW** 方向的研究：关心“智能系统怎么在真实生活里帮到人”，尤其是和 **日常健康（everyday health）**、可穿戴与人机协作决策相关的场景。
 
 如果你想看更学术向的版本（CV / research / projects），可以去我的学术主页：

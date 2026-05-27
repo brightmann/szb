@@ -5,6 +5,7 @@ import { isValidElement } from 'react'
 import { CustomImage, SakuraIcon } from '@/components/ui'
 import { generateHierarchicalSlug, slugPrefix } from '@/services/utils'
 import { KEY_ICONS } from './keyboardIcons'
+import SpoilerText from './Spoiler/SpoilerText'
 
 const CodeBlock = dynamic(async () => import('./codeBlock/renderCodeBlock'))
 const FriendLinks = dynamic(async () => import('./FriendLinks'))
@@ -163,6 +164,23 @@ const createMarkdownComponents = (translation: Translation, autoSlug: boolean = 
         </span>
       </label>
     ),
+    span: ({ className = '', children }) => {
+      const isSpoiler = className.split(/\s+/).includes('discourse-spoiler')
+
+      if (isSpoiler) {
+        return (
+          <SpoilerText className={className}>
+            {children}
+          </SpoilerText>
+        )
+      }
+
+      return (
+        <span className={className}>
+          {children}
+        </span>
+      )
+    },
 
     // List related
     ul: ({ children }) => (
