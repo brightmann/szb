@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react'
+import type { ComponentPropsWithoutRef, ReactNode } from 'react'
 import type { Components as MarkdownComponents } from 'react-markdown'
 import dynamic from 'next/dynamic'
 import { isValidElement } from 'react'
@@ -12,6 +12,21 @@ import { SpoilerText } from './remarkExtendedMarkdown/components'
 
 const CodeBlock = dynamic(async () => import('./codeBlock/renderCodeBlock'))
 const FriendLinks = dynamic(async () => import('./FriendLinks'))
+
+type MarkdownAnchorProps = ComponentPropsWithoutRef<'a'> & {
+  'data-footnote-backref'?: boolean | string
+  'data-footnote-ref'?: boolean | string
+  'node'?: unknown
+}
+
+type MarkdownSectionProps = ComponentPropsWithoutRef<'section'> & {
+  'data-footnotes'?: boolean | string
+  'node'?: unknown
+}
+
+const hasToken = (value: string | undefined, token: string): boolean => {
+  return value?.split(/\s+/).includes(token) === true
+}
 
 const createMarkdownComponents = (translation: Translation, autoSlug: boolean = true): MarkdownComponents => {
   // Set initial heading levels
@@ -27,7 +42,15 @@ const createMarkdownComponents = (translation: Translation, autoSlug: boolean = 
 
   return {
     // Heading related
-    h2: ({ children }) => {
+    h2: ({ children, className, id }) => {
+      if (hasToken(className, 'sr-only')) {
+        return (
+          <h2 id={id} className="sr-only">
+            {children}
+          </h2>
+        )
+      }
+
       const slug = generateHierarchicalSlug('h2', headingLevels)
       return (
         <h2
@@ -221,7 +244,42 @@ const createMarkdownComponents = (translation: Translation, autoSlug: boolean = 
     ),
 
     // Link related
-    a: ({ href = '#', children, ...props }: { href?: string, children?: ReactNode }) => {
+    a: ({
+      href = '#',
+      children,
+      className,
+      node: _node,
+      ...props
+    }: MarkdownAnchorProps) => {
+      const isFootnoteRef = props['data-footnote-ref'] != null
+      const isFootnoteBackref = props['data-footnote-backref'] != null
+
+      if (isFootnoteRef) {
+        return (
+          <a
+            href={href}
+            className={`mx-0.5 inline-flex min-h-5 min-w-5 items-center justify-center rounded-full bg-primary-300/20 px-1.5 text-xs font-semibold text-primary-500 transition-colors hover:bg-primary-300/35 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-300 dark:bg-primary-200/15 dark:text-primary-200 dark:hover:bg-primary-200/25 ${className ?? ''}`}
+            aria-label={`Jump to footnote ${children?.toString() ?? ''}`}
+            {...props}
+          >
+            {children}
+          </a>
+        )
+      }
+
+      if (isFootnoteBackref) {
+        return (
+          <a
+            href={href}
+            className={`ml-2 inline-flex min-h-6 min-w-6 items-center justify-center rounded-full text-primary transition-colors hover:bg-primary-300/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-300 dark:hover:bg-primary-200/15 ${className ?? ''}`}
+            aria-label="Back to footnote reference"
+            {...props}
+          >
+            {children}
+          </a>
+        )
+      }
+
       const isInternalLink = typeof href === 'string' && (href.startsWith('/') || href.startsWith('#'))
       return (
         <a
@@ -233,7 +291,7 @@ const createMarkdownComponents = (translation: Translation, autoSlug: boolean = 
               ? undefined
               : `${translation.newTab}${children?.toString() ?? 'link'}`
           }
-          className="text-hover-primary underline-interactive mx-1 break-words font-semibold text-secondary decoration-[#5BCEFA] dark:decoration-[#81E6D9] hover:text-accent-700 dark:hover:text-accent-600"
+          className={`text-hover-primary underline-interactive mx-1 break-words font-semibold text-secondary decoration-[#5BCEFA] dark:decoration-[#81E6D9] hover:text-accent-700 dark:hover:text-accent-600 ${className ?? ''}`}
           {...(props)}
         >
           {children}
@@ -363,6 +421,48 @@ const createMarkdownComponents = (translation: Translation, autoSlug: boolean = 
     br: () => (
       <br className="flex justify-center my-4" />
     ),
+    section: ({
+      children,
+      className,
+      node: _node,
+      ...props
+    }: MarkdownSectionProps) => {
+      const isFootnotes = props['data-footnotes'] != null || hasToken(className, 'footnotes')
+
+      if (!isFootnotes) {
+        return (
+          <section className={className} {...props}>
+            {children}
+          </section>
+        )
+      }
+
+      return (
+        <section
+          className={`clear-both mt-12 border-t border-primary-300/30 pt-5 text-sm text-gray-700 dark:border-primary-200/25 dark:text-gray-200 ${className ?? ''}`}
+          aria-label="Footnotes"
+          {...props}
+        >
+          <div
+            className={[
+              '[&>div]:!my-3',
+              '[&>div]:!rounded-none',
+              '[&>div]:!border-0',
+              '[&>div]:!p-0',
+              '[&>div]:!shadow-none',
+              '[&_ol]:!ml-5',
+              '[&_ol]:!list-decimal',
+              '[&_li]:!my-2',
+              '[&_li]:!pl-1',
+              '[&_p]:!my-1',
+              '[&_p]:!leading-relaxed',
+            ].join(' ')}
+          >
+            {children}
+          </div>
+        </section>
+      )
+    },
   }
 }
 
