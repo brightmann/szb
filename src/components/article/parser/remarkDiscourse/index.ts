@@ -6,6 +6,9 @@ import {
   transformDiscourseDetails,
 } from './details'
 import {
+  transformInlineFormats,
+} from './inlineFormat'
+import {
   PHRASING_PARENT_TYPES,
   transformInlineSpoilers,
 } from './spoiler'
@@ -29,7 +32,10 @@ const remarkDiscourse = () => {
         && 'children' in node
         && Array.isArray(node.children)
       ) {
-        transformInlineSpoilers(node as PhrasingParent)
+        const parent = node as PhrasingParent
+
+        transformInlineSpoilers(parent)
+        transformInlineFormats(parent)
       }
     })
   }
@@ -37,6 +43,7 @@ const remarkDiscourse = () => {
 
 export {
   transformDiscourseDetails,
+  transformInlineFormats,
   transformInlineSpoilers,
 }
 

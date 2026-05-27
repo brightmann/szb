@@ -36,6 +36,39 @@ export interface DiscourseSummary {
   }
 }
 
+export interface DiscourseMark {
+  type: 'discourseMark'
+  children: PhrasingContent[]
+  data: {
+    hName: 'mark'
+    hProperties: {
+      className: string
+    }
+  }
+}
+
+export interface DiscourseSub {
+  type: 'discourseSub'
+  children: PhrasingContent[]
+  data: {
+    hName: 'sub'
+    hProperties: {
+      className: string
+    }
+  }
+}
+
+export interface DiscourseSup {
+  type: 'discourseSup'
+  children: PhrasingContent[]
+  data: {
+    hName: 'sup'
+    hProperties: {
+      className: string
+    }
+  }
+}
+
 export interface PhrasingParent {
   type: string
   children: PhrasingContent[]
@@ -50,6 +83,9 @@ declare module 'mdast' {
   interface PhrasingContentMap {
     discourseSpoiler: DiscourseSpoiler
     discourseSummary: DiscourseSummary
+    discourseMark: DiscourseMark
+    discourseSub: DiscourseSub
+    discourseSup: DiscourseSup
   }
 
   interface RootContentMap {

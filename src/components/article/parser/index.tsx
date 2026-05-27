@@ -26,7 +26,7 @@ const MarkdownContent = async ({ post, translation }: MarkdownContentProps) => {
     <div className="post-content mt-5">
       <Markdown
         remarkPlugins={[
-          remarkGfm,
+          [remarkGfm, { singleTilde: false }],
           remarkMath,
           remarkGemoji,
           remarkDiscourse,

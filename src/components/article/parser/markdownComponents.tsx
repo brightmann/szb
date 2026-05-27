@@ -121,8 +121,23 @@ const createMarkdownComponents = (translation: Translation, autoSlug: boolean = 
         {children}
       </del>
     ),
-    sup: ({ children }) => <sup className="text-xs align-super">{children}</sup>,
-    sub: ({ children }) => <sub className="text-xs align-sub">{children}</sub>,
+    mark: ({ children, className = '' }) => (
+      <mark className={`rounded bg-yellow-200 px-1 py-0.5 ${className}`}>
+        {children}
+      </mark>
+    ),
+
+    sup: ({ children, className = '' }) => (
+      <sup className={`text-xs align-super ${className}`}>
+        {children}
+      </sup>
+    ),
+
+    sub: ({ children, className = '' }) => (
+      <sub className={`text-xs align-sub ${className}`}>
+        {children}
+      </sub>
+    ),
     blockquote: ({ children }) => (
       <div className="my-3 flex justify-center">
         <blockquote className="w-[95%] rounded-md border-l-4 border-primary-300 dark:border-primary-200 bg-gray-light bg-opacity-75 py-0.5 pl-3 pr-2 italic shadow-sm transition-shadow duration-300 hover:shadow-md">
@@ -133,11 +148,6 @@ const createMarkdownComponents = (translation: Translation, autoSlug: boolean = 
     details: MarkdownDetails,
     summary: MarkdownSummary,
 
-    mark: ({ children }) => (
-      <mark className="bg-yellow-200 px-1 py-0.5 rounded">
-        {children}
-      </mark>
-    ),
     // Checkbox related [x] or [ ]
     input: ({ children, ...props }) => (
       <label className="relative inline-flex items-center text-center">
