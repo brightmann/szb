@@ -170,15 +170,21 @@ Discourse-style image grids:
 ```md
 [grid]
 ![Grid sample 1|640x360](/images/background.jpg)
-![Grid sample 2|640x360](/images/avatar.jpg)
-![Grid sample 3|640x360](/images/copyright.png)
+![Grid sample 2|480x720](/images/avatar.jpg)
+![Grid sample 3|640x640](/images/copyright.png)
+![Grid sample 4|640x520](/images/projects/deep-learning.jpg)
+![Grid sample 5|420x560](/images/background.jpg)
+![Grid sample 6|640x430](/images/avatar.jpg)
 [/grid]
 ```
 
 [grid]
 ![Grid sample 1|640x360](/images/background.jpg)
-![Grid sample 2|640x360](/images/avatar.jpg)
-![Grid sample 3|640x360](/images/copyright.png)
+![Grid sample 2|480x720](/images/avatar.jpg)
+![Grid sample 3|640x640](/images/copyright.png)
+![Grid sample 4|640x520](/images/projects/deep-learning.jpg)
+![Grid sample 5|420x560](/images/background.jpg)
+![Grid sample 6|640x430](/images/avatar.jpg)
 [/grid]
 
 Discourse-style carousel mode:
@@ -188,6 +194,8 @@ Discourse-style carousel mode:
 ![Carousel sample 1|640x360](/images/background.jpg)
 ![Carousel sample 2|640x360](/images/avatar.jpg)
 ![Carousel sample 3|640x360](/images/copyright.png)
+![Carousel sample 4|640x360](/images/projects/deep-learning.jpg)
+![Carousel sample 5|640x360](/images/background.jpg)
 [/grid]
 ```
 
@@ -195,6 +203,8 @@ Discourse-style carousel mode:
 ![Carousel sample 1|640x360](/images/background.jpg)
 ![Carousel sample 2|640x360](/images/avatar.jpg)
 ![Carousel sample 3|640x360](/images/copyright.png)
+![Carousel sample 4|640x360](/images/projects/deep-learning.jpg)
+![Carousel sample 5|640x360](/images/background.jpg)
 [/grid]
 
 ## Blockquotes
