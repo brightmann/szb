@@ -74,9 +74,9 @@ const getWrapperClassName = (layout: ImageLayout): string => {
     case 'full':
       return `${baseClassName} relative left-1/2 -ml-[50vw] w-screen px-4 sm:px-6`
     case 'left':
-      return `${baseClassName} float-left mb-4 mr-4 max-w-full sm:max-w-[50%]`
+      return `${baseClassName} mb-4 max-w-full sm:float-left sm:mr-4 sm:max-w-[50%]`
     case 'right':
-      return `${baseClassName} float-right mb-4 ml-4 max-w-full sm:max-w-[50%]`
+      return `${baseClassName} mb-4 max-w-full sm:float-right sm:ml-4 sm:max-w-[50%]`
     case 'thumbnail':
       return `${baseClassName} inline-block max-w-48 align-middle`
     case 'wide':
