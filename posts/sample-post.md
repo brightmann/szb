@@ -74,6 +74,7 @@ A note [^1] and another note [^2]
 
 - [ ] to do
 - [x] done
+- [ ] review custom Markdown rendering
 
 <details>
 <summary>点击展开</summary>
@@ -128,6 +129,9 @@ This is a danger callout.
 - Item 2
 - Item 2a
 - Item 2b
+- Nested items keep readable spacing:
+  - Child item
+  - Another child item
 
 ### Ordered
 
@@ -158,6 +162,40 @@ Discourse-style image metadata can control size and layout:
 This paragraph wraps around the left image on larger screens while still stacking cleanly on mobile.
 
 ![Wide sample|wide](/images/background.jpg)
+
+Click any Markdown image to open a larger preview.
+
+Discourse-style image grids:
+
+```md
+[grid]
+![Grid sample 1|640x360](/images/background.jpg)
+![Grid sample 2|640x360](/images/avatar.jpg)
+![Grid sample 3|640x360](/images/copyright.png)
+[/grid]
+```
+
+[grid]
+![Grid sample 1|640x360](/images/background.jpg)
+![Grid sample 2|640x360](/images/avatar.jpg)
+![Grid sample 3|640x360](/images/copyright.png)
+[/grid]
+
+Discourse-style carousel mode:
+
+```md
+[grid mode="carousel"]
+![Carousel sample 1|640x360](/images/background.jpg)
+![Carousel sample 2|640x360](/images/avatar.jpg)
+![Carousel sample 3|640x360](/images/copyright.png)
+[/grid]
+```
+
+[grid mode="carousel"]
+![Carousel sample 1|640x360](/images/background.jpg)
+![Carousel sample 2|640x360](/images/avatar.jpg)
+![Carousel sample 3|640x360](/images/copyright.png)
+[/grid]
 
 ## Blockquotes
 
