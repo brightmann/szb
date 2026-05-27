@@ -2,12 +2,14 @@
 
 import type {
   ComponentPropsWithoutRef,
+  CSSProperties,
   FocusEvent,
   MouseEvent,
   ReactNode,
+  RefObject,
 } from 'react'
 import { CornerUpLeft } from 'lucide-react'
-import { useEffect, useId, useState } from 'react'
+import { useEffect, useId, useRef, useState } from 'react'
 
 /**
  * Inline tooltip primitives for Markdown-only affordances.
@@ -37,6 +39,15 @@ const cx = (...classes: Array<string | undefined | false | null>) => {
   return classes.filter(Boolean).join(' ')
 }
 
+const TOOLTIP_VIEWPORT_PADDING = 16
+const TOOLTIP_GAP = 8
+
+interface TooltipPosition {
+  left: number
+  placement: 'above' | 'below'
+  top: number
+}
+
 const getFootnoteText = (hash: string): string => {
   const id = decodeURIComponent(hash.replace(/^#/, ''))
 
@@ -57,6 +68,66 @@ const scrollToHashTarget = (hash: string) => {
   window.history.replaceState(null, '', `#${id}`)
 }
 
+const getTooltipPosition = (
+  trigger: HTMLElement,
+  maxWidth: number,
+): TooltipPosition => {
+  const rect = trigger.getBoundingClientRect()
+  const viewportWidth = window.innerWidth
+  const tooltipWidth = Math.min(maxWidth, viewportWidth - TOOLTIP_VIEWPORT_PADDING * 2)
+  const centeredLeft = rect.left + rect.width / 2 - tooltipWidth / 2
+  const left = Math.min(
+    Math.max(centeredLeft, TOOLTIP_VIEWPORT_PADDING),
+    viewportWidth - tooltipWidth - TOOLTIP_VIEWPORT_PADDING,
+  )
+  const placement = rect.top < 96 ? 'below' : 'above'
+
+  return {
+    left,
+    placement,
+    top: placement === 'above'
+      ? rect.top - TOOLTIP_GAP
+      : rect.bottom + TOOLTIP_GAP,
+  }
+}
+
+const getTooltipStyle = (
+  position: TooltipPosition | null,
+  maxWidth: number,
+): CSSProperties | undefined => {
+  if (position == null) {
+    return undefined
+  }
+
+  return {
+    left: position.left,
+    maxWidth: `min(${maxWidth}px, calc(100vw - ${TOOLTIP_VIEWPORT_PADDING * 2}px))`,
+    top: position.top,
+  }
+}
+
+const useTooltipPosition = (
+  triggerRef: RefObject<HTMLElement | null>,
+  maxWidth: number,
+) => {
+  const [position, setPosition] = useState<TooltipPosition | null>(null)
+
+  const updatePosition = () => {
+    const trigger = triggerRef.current
+
+    if (trigger == null) {
+      return
+    }
+
+    setPosition(getTooltipPosition(trigger, maxWidth))
+  }
+
+  return {
+    position,
+    updatePosition,
+  }
+}
+
 export function MarkdownAbbreviation({
   children,
   className,
@@ -67,11 +138,14 @@ export function MarkdownAbbreviation({
   const explanation = typeof title === 'string' ? title : undefined
   const label = children?.toString() ?? ''
   const tooltipId = useId()
+  const triggerRef = useRef<HTMLElement>(null)
+  const { position, updatePosition } = useTooltipPosition(triggerRef, 256)
 
   return (
     <span className="group/abbr relative inline-flex items-baseline">
       <abbr
         {...props}
+        ref={triggerRef}
         className={cx(
           'cursor-help rounded px-0.5 font-semibold text-primary underline decoration-primary-300/70 decoration-dotted underline-offset-4',
           'outline-none transition-colors hover:bg-primary-300/10 focus-visible:bg-primary-300/10 focus-visible:ring-2 focus-visible:ring-primary-300',
@@ -80,6 +154,14 @@ export function MarkdownAbbreviation({
         )}
         aria-label={explanation != null ? `${label}: ${explanation}` : label}
         aria-describedby={explanation != null ? tooltipId : undefined}
+        onFocus={(event) => {
+          updatePosition()
+          props.onFocus?.(event)
+        }}
+        onPointerEnter={(event) => {
+          updatePosition()
+          props.onPointerEnter?.(event)
+        }}
         tabIndex={0}
       >
         {children}
@@ -96,13 +178,15 @@ export function MarkdownAbbreviation({
       {explanation != null && (
         <span
           id={tooltipId}
+          data-placement={position?.placement ?? 'above'}
           className={cx(
             'markdown-tooltip-surface',
-            'pointer-events-none absolute bottom-full left-1/2 z-40 mb-2 w-max max-w-64 -translate-x-1/2 rounded-md border border-primary-300/40',
+            'pointer-events-none fixed z-40 w-max rounded-md border border-primary-300/40',
             'bg-background px-3 py-2 text-xs font-medium leading-relaxed text-gray-800 shadow-lg shadow-primary-950/10',
             'dark:border-primary-200/40 dark:text-gray-100',
           )}
           role="tooltip"
+          style={getTooltipStyle(position, 256)}
         >
           {explanation}
         </span>
@@ -120,7 +204,9 @@ export function MarkdownFootnoteReference({
 }: MarkdownFootnoteReferenceProps) {
   const label = children?.toString() ?? ''
   const tooltipId = useId()
+  const triggerRef = useRef<HTMLAnchorElement>(null)
   const [preview, setPreview] = useState('')
+  const { position, updatePosition } = useTooltipPosition(triggerRef, 288)
 
   useEffect(() => {
     if (href.startsWith('#')) {
@@ -130,6 +216,7 @@ export function MarkdownFootnoteReference({
 
   const updatePreview = () => {
     setPreview(href.startsWith('#') ? getFootnoteText(href) : '')
+    updatePosition()
   }
 
   const handleClick = (event: MouseEvent<HTMLAnchorElement>) => {
@@ -147,6 +234,7 @@ export function MarkdownFootnoteReference({
     <span className="group/footnote relative inline-flex items-center align-super">
       <a
         {...props}
+        ref={triggerRef}
         href={href}
         className={cx(
           'mx-0.5 inline-flex min-h-5 min-w-5 items-center justify-center rounded-full bg-primary-300/20 px-1.5 text-xs font-semibold text-primary-500',
@@ -165,13 +253,15 @@ export function MarkdownFootnoteReference({
 
       <span
         id={tooltipId}
+        data-placement={position?.placement ?? 'above'}
         className={cx(
           'markdown-tooltip-surface',
-          'pointer-events-none absolute bottom-full left-1/2 z-40 mb-2 w-max max-w-72 -translate-x-1/2 rounded-md border border-primary-300/40',
+          'pointer-events-none fixed z-40 w-max rounded-md border border-primary-300/40',
           'bg-background px-3 py-2 text-left text-xs font-medium leading-relaxed text-gray-800 shadow-lg shadow-primary-950/10',
           'dark:border-primary-200/40 dark:text-gray-100',
         )}
         role="tooltip"
+        style={getTooltipStyle(position, 288)}
       >
         {preview}
       </span>

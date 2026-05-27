@@ -481,16 +481,13 @@ const createMarkdownComponents = (translation: Translation, autoSlug: boolean = 
 
       return (
         <section
-          className={`clear-both mt-12 border-t border-primary-300/30 pt-5 text-sm text-gray-700 dark:border-primary-200/25 dark:text-gray-200 ${className ?? ''}`}
+          className={`markdown-footnotes clear-both mt-12 border-t border-primary-300/30 pt-5 text-sm text-gray-700 dark:border-primary-200/25 dark:text-gray-200 ${className ?? ''}`}
           aria-label="Footnotes"
           {...props}
         >
           <div
             className={[
-              '[&_ol]:!ml-5',
-              '[&_ol]:!list-decimal',
               '[&_li]:!my-2',
-              '[&_li]:!pl-1',
               '[&_p]:!my-1',
               '[&_p]:!leading-relaxed',
             ].join(' ')}

@@ -121,7 +121,7 @@
 
   .markdown-tooltip-surface {
     opacity: 0;
-    transform: translate3d(-50%, 0.35rem, 0) scale(0.96);
+    transform: translate3d(0, 0.35rem, 0) scale(0.96);
     transform-origin: bottom center;
     transition:
       opacity 160ms ease,
@@ -134,7 +134,39 @@
   .group\/footnote:hover .markdown-tooltip-surface,
   .group\/footnote:focus-within .markdown-tooltip-surface {
     opacity: 1;
-    transform: translate3d(-50%, 0, 0) scale(1);
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+
+  .markdown-tooltip-surface[data-placement='above'] {
+    transform: translate3d(0, calc(-100% + 0.35rem), 0) scale(0.96);
+    transform-origin: bottom center;
+  }
+
+  .markdown-tooltip-surface[data-placement='above']:where(
+      .group\/abbr:hover *,
+      .group\/abbr:focus-within *,
+      .group\/footnote:hover *,
+      .group\/footnote:focus-within *
+    ) {
+    transform: translate3d(0, -100%, 0) scale(1);
+  }
+
+  .markdown-footnotes .markdown-ordered-list {
+    margin-block: 0;
+    padding-inline-start: 1.25rem;
+    list-style: decimal;
+    counter-reset: none;
+  }
+
+  .markdown-footnotes .markdown-list-item {
+    position: static;
+    padding-inline-start: 0.25rem;
+    counter-increment: none;
+  }
+
+  .markdown-footnotes .markdown-list-item::before {
+    display: none;
+    content: none;
   }
 
   .markdown-gallery-grid {
