@@ -1,8 +1,6 @@
-'use client'
-
 import type { ComponentPropsWithoutRef, ReactNode } from 'react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
-import { Children, useId, useState } from 'react'
+import { Children } from 'react'
 
 type GalleryMode = 'carousel' | 'grid'
 
@@ -19,8 +17,8 @@ const cx = (...classes: Array<string | undefined | false | null>) => {
 /**
  * Renders Discourse-style image grids and carousel galleries.
  *
- * The parser keeps gallery syntax Markdown-native; this component only handles
- * responsive layout and accessible controls for the generated image children.
+ * The parser keeps gallery syntax Markdown-native; runtime click and swipe
+ * handling is delegated from `MarkdownArticleInteractions`.
  */
 export function MarkdownGallery({
   children,
@@ -30,16 +28,6 @@ export function MarkdownGallery({
   ...props
 }: MarkdownGalleryProps) {
   const items = Children.toArray(children).filter(Boolean)
-  const [activeIndex, setActiveIndex] = useState(0)
-  const carouselLabelId = useId()
-
-  const selectCarouselItem = (nextIndex: number) => {
-    if (items.length === 0) {
-      return
-    }
-
-    setActiveIndex((nextIndex + items.length) % items.length)
-  }
 
   if (mode === 'carousel') {
     return (
@@ -51,12 +39,8 @@ export function MarkdownGallery({
         )}
         data-gallery-mode={mode}
         role="region"
-        aria-labelledby={carouselLabelId}
+        aria-label="Image carousel"
       >
-        <span id={carouselLabelId} className="sr-only">
-          Image carousel
-        </span>
-
         <div className="markdown-gallery-carousel-track">
           {items.map((item, index) => (
             <div
@@ -64,8 +48,9 @@ export function MarkdownGallery({
               // order is the canonical identity inside a static post.
               key={index}
               className="markdown-gallery-carousel-item [&>p]:!m-0"
-              data-active={index === activeIndex}
-              aria-hidden={index === activeIndex ? undefined : true}
+              data-active={index === 0}
+              aria-hidden={index === 0 ? undefined : true}
+              inert={index === 0 ? undefined : true}
             >
               {item}
             </div>
@@ -78,7 +63,7 @@ export function MarkdownGallery({
               type="button"
               className="inline-flex h-10 w-10 items-center justify-center rounded-full text-white/80 transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
               aria-label="Previous image"
-              onClick={() => selectCarouselItem(activeIndex - 1)}
+              data-carousel-action="previous"
             >
               <ChevronLeft className="h-6 w-6" aria-hidden="true" />
             </button>
@@ -87,14 +72,12 @@ export function MarkdownGallery({
                 <button
                   key={index}
                   type="button"
-                  className={cx(
-                    'h-3 w-3 rounded-full bg-white/55 transition-all duration-200 hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white',
-                    index === activeIndex && 'w-10 bg-white/80',
-                  )}
+                  className="markdown-gallery-carousel-dot h-3 w-3 rounded-full bg-white/55 transition-all duration-200 hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+                  data-active={index === 0}
+                  data-carousel-index={index}
                   role="tab"
                   aria-label={`Show image ${index + 1}`}
-                  aria-selected={index === activeIndex}
-                  onClick={() => selectCarouselItem(index)}
+                  aria-selected={index === 0}
                 />
               ))}
             </div>
@@ -102,7 +85,7 @@ export function MarkdownGallery({
               type="button"
               className="inline-flex h-10 w-10 items-center justify-center rounded-full text-white/80 transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
               aria-label="Next image"
-              onClick={() => selectCarouselItem(activeIndex + 1)}
+              data-carousel-action="next"
             >
               <ChevronRight className="h-6 w-6" aria-hidden="true" />
             </button>

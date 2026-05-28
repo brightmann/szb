@@ -271,6 +271,7 @@ export function MarkdownImage({
       <button
         type="button"
         className={getButtonClassName(meta.layout)}
+        data-markdown-image-preview=""
         aria-label={`Open image preview: ${meta.alt}`}
         onClick={openPreview}
         onKeyDown={handleImageKeyDown}
