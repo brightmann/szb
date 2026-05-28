@@ -6,41 +6,9 @@ const MARKDOWN_ARTICLE_INTERACTIONS_SCRIPT = String.raw`
 
   window.__suzuMarkdownInteractions = true;
 
-  const SWIPE_THRESHOLD = 44;
   const PREVIEW_CLOSE_DELAY = 220;
-  let swipeStart = null;
 
   const getRoot = () => document.querySelector('.post-content');
-
-  const getActiveCarouselIndex = (carousel) => {
-    return Array
-      .from(carousel.querySelectorAll('.markdown-gallery-carousel-item'))
-      .findIndex((item) => item.dataset.active === 'true');
-  };
-
-  const selectCarouselItem = (carousel, nextIndex) => {
-    const items = Array.from(carousel.querySelectorAll('.markdown-gallery-carousel-item'));
-    const dots = Array.from(carousel.querySelectorAll('.markdown-gallery-carousel-dot'));
-
-    if (items.length === 0) {
-      return;
-    }
-
-    const activeIndex = (nextIndex + items.length) % items.length;
-
-    items.forEach((item, index) => {
-      const isActive = index === activeIndex;
-      item.dataset.active = String(isActive);
-      item.toggleAttribute('aria-hidden', !isActive);
-      item.toggleAttribute('inert', !isActive);
-    });
-
-    dots.forEach((dot, index) => {
-      const isActive = index === activeIndex;
-      dot.dataset.active = String(isActive);
-      dot.setAttribute('aria-selected', String(isActive));
-    });
-  };
 
   const openImagePreview = (button) => {
     const image = button.querySelector('img');
@@ -111,91 +79,12 @@ const MARKDOWN_ARTICLE_INTERACTIONS_SCRIPT = String.raw`
       return;
     }
 
-    const carouselAction = target.closest('button[data-carousel-action]');
-
-    if (carouselAction != null) {
-      const carousel = carouselAction.closest('.markdown-gallery-carousel');
-      const activeIndex = carousel == null ? -1 : getActiveCarouselIndex(carousel);
-
-      if (carousel != null && activeIndex >= 0) {
-        event.preventDefault();
-        event.stopPropagation();
-        selectCarouselItem(
-          carousel,
-          activeIndex + (carouselAction.dataset.carouselAction === 'next' ? 1 : -1),
-        );
-      }
-
-      return;
-    }
-
-    const carouselDot = target.closest('button[data-carousel-index]');
-
-    if (carouselDot != null) {
-      const carousel = carouselDot.closest('.markdown-gallery-carousel');
-      const nextIndex = Number(carouselDot.dataset.carouselIndex);
-
-      if (carousel != null && Number.isInteger(nextIndex)) {
-        event.preventDefault();
-        event.stopPropagation();
-        selectCarouselItem(carousel, nextIndex);
-      }
-
-      return;
-    }
-
     const previewButton = target.closest('button[data-markdown-image-preview]');
 
     if (previewButton != null) {
       event.preventDefault();
       event.stopPropagation();
       openImagePreview(previewButton);
-    }
-  };
-
-  const handlePointerDown = (event) => {
-    const target = event.target instanceof Element ? event.target : null;
-    const root = getRoot();
-    const carousel = target == null ? null : target.closest('.markdown-gallery-carousel');
-
-    if (
-      root == null
-      || carousel == null
-      || !root.contains(carousel)
-      || event.pointerType === 'mouse'
-    ) {
-      return;
-    }
-
-    swipeStart = {
-      carousel,
-      x: event.clientX,
-      y: event.clientY,
-    };
-  };
-
-  const handlePointerUp = (event) => {
-    if (swipeStart == null) {
-      return;
-    }
-
-    const deltaX = event.clientX - swipeStart.x;
-    const deltaY = event.clientY - swipeStart.y;
-    const carousel = swipeStart.carousel;
-    swipeStart = null;
-
-    if (
-      Math.abs(deltaX) < SWIPE_THRESHOLD
-      || Math.abs(deltaX) < Math.abs(deltaY) * 1.25
-    ) {
-      return;
-    }
-
-    const activeIndex = getActiveCarouselIndex(carousel);
-
-    if (activeIndex >= 0) {
-      event.preventDefault();
-      selectCarouselItem(carousel, activeIndex + (deltaX < 0 ? 1 : -1));
     }
   };
 
@@ -209,19 +98,13 @@ const MARKDOWN_ARTICLE_INTERACTIONS_SCRIPT = String.raw`
       ?.click();
   };
 
-  getRoot()?.setAttribute('data-markdown-interactions', 'ready');
   document.addEventListener('click', handleClick, true);
-  document.addEventListener('pointerdown', handlePointerDown);
-  document.addEventListener('pointerup', handlePointerUp);
-  document.addEventListener('pointercancel', () => {
-    swipeStart = null;
-  });
   window.addEventListener('keydown', handleKeyDown);
 })();
 `
 
 /**
- * Runtime event delegation for Markdown that is rendered as static article DOM.
+ * Runtime image-preview delegation for Markdown rendered as static article DOM.
  */
 export function MarkdownArticleInteractions() {
   return (

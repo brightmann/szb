@@ -222,14 +222,12 @@
     max-width: 100% !important;
   }
 
-  .markdown-gallery-grid [data-markdown-image] > button,
-  .markdown-gallery-carousel [data-markdown-image] > button {
+  .markdown-gallery-grid [data-markdown-image] > button {
     width: 100% !important;
     justify-content: center !important;
   }
 
-  .markdown-gallery-grid [data-markdown-image] [data-nimg],
-  .markdown-gallery-carousel [data-markdown-image] [data-nimg] {
+  .markdown-gallery-grid [data-markdown-image] [data-nimg] {
     width: 100% !important;
     height: auto !important;
     min-width: 0 !important;
@@ -238,75 +236,6 @@
 
   .markdown-gallery-grid [data-markdown-image] [data-nimg] {
     max-height: none !important;
-  }
-
-  .markdown-gallery-carousel {
-    position: relative;
-    display: grid;
-    place-items: center;
-    min-height: min(64vh, 36rem);
-    padding: 3rem 0 4.25rem;
-    touch-action: pan-y;
-  }
-
-  .markdown-gallery-carousel-track {
-    display: grid;
-    width: min(100%, 34rem);
-    min-height: min(54vh, 30rem);
-    place-items: center;
-  }
-
-  .markdown-gallery-carousel-item {
-    grid-area: 1 / 1;
-    width: 100%;
-    opacity: 0;
-    transform: translate3d(0, 0.75rem, 0) scale(0.965);
-    transition:
-      opacity 220ms ease,
-      transform 280ms cubic-bezier(0.2, 0.8, 0.2, 1);
-    pointer-events: none;
-  }
-
-  .markdown-gallery-carousel-item[data-active='true'] {
-    opacity: 1;
-    transform: translate3d(0, 0, 0) scale(1);
-    pointer-events: auto;
-    z-index: 1;
-  }
-
-  .markdown-gallery-carousel-item [data-markdown-image] {
-    margin-block: 0 !important;
-  }
-
-  .markdown-gallery-carousel-item [data-markdown-image] [data-nimg] {
-    max-height: min(54vh, 30rem) !important;
-    border-radius: 0.75rem;
-  }
-
-  .markdown-gallery-carousel-controls {
-    position: absolute;
-    inset-block-end: 1rem;
-    inset-inline: 0;
-    z-index: 2;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 1.25rem;
-  }
-
-  .markdown-gallery-carousel-dots {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.75rem;
-    padding: 0.75rem 1rem;
-    border-radius: 999px;
-    background: rgb(255 255 255 / 11%);
-    backdrop-filter: blur(12px);
-  }
-
-  .markdown-gallery-carousel-dot[data-active='true'] {
-    width: 2.5rem;
-    background: rgb(255 255 255 / 80%);
   }
 
   .markdown-image-preview {
@@ -342,8 +271,7 @@
   @media (prefers-reduced-motion: reduce) {
     .markdown-tooltip-surface,
     .markdown-image-preview,
-    .markdown-image-preview-frame,
-    .markdown-gallery-carousel-item {
+    .markdown-image-preview-frame {
       transition: none;
     }
   }

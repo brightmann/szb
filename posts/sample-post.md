@@ -187,26 +187,6 @@ Discourse-style image grids:
 ![Grid sample 6|640x430](/images/avatar.jpg)
 [/grid]
 
-Discourse-style carousel mode:
-
-```md
-[grid mode="carousel"]
-![Carousel sample 1|640x360](/images/background.jpg)
-![Carousel sample 2|640x360](/images/avatar.jpg)
-![Carousel sample 3|640x360](/images/copyright.png)
-![Carousel sample 4|640x360](/images/projects/deep-learning.jpg)
-![Carousel sample 5|640x360](/images/background.jpg)
-[/grid]
-```
-
-[grid mode="carousel"]
-![Carousel sample 1|640x360](/images/background.jpg)
-![Carousel sample 2|640x360](/images/avatar.jpg)
-![Carousel sample 3|640x360](/images/copyright.png)
-![Carousel sample 4|640x360](/images/projects/deep-learning.jpg)
-![Carousel sample 5|640x360](/images/background.jpg)
-[/grid]
-
 ## Blockquotes
 
 > Markdown is a lightweight markup language with plain-text-formatting syntax, created in 2004 by John Gruber with Aaron Swartz.

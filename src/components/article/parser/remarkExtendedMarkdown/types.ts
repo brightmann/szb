@@ -34,8 +34,6 @@ export const EXTENDED_MARKDOWN_ADMONITION_KINDS = [
 export type ExtendedMarkdownAdmonitionKind
   = typeof EXTENDED_MARKDOWN_ADMONITION_KINDS[number]
 
-export type ExtendedMarkdownGalleryMode = 'carousel' | 'grid'
-
 /** Inline spoiler content written as `[spoiler]hidden[/spoiler]`. */
 export interface ExtendedMarkdownSpoiler {
   type: 'extendedMarkdownSpoiler'
@@ -63,14 +61,14 @@ export interface ExtendedMarkdownAdmonition {
   >
 }
 
-/** Discourse-style image gallery written with `[grid]` or carousel grid tags. */
+/** Discourse-style image gallery written with `[grid]` tags. */
 export interface ExtendedMarkdownImageGallery {
   type: 'extendedMarkdownImageGallery'
   children: RootContent[]
   data: HtmlNodeData<
     'div',
     {
-      'data-gallery-mode': ExtendedMarkdownGalleryMode
+      'data-gallery-mode': 'grid'
     }
   >
 }

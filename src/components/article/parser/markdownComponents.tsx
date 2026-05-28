@@ -32,7 +32,7 @@ type MarkdownSectionProps = ComponentPropsWithoutRef<'section'> & {
 }
 
 type MarkdownDivProps = ComponentPropsWithoutRef<'div'> & {
-  'data-gallery-mode'?: 'carousel' | 'grid'
+  'data-gallery-mode'?: 'grid'
   'node'?: unknown
 }
 

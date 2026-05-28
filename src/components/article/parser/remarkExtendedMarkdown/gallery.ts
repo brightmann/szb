@@ -1,8 +1,5 @@
 import type { Paragraph, PhrasingContent, RootContent, Text } from 'mdast'
-import type {
-  ExtendedMarkdownGalleryMode,
-  ExtendedMarkdownImageGallery,
-} from './types'
+import type { ExtendedMarkdownImageGallery } from './types'
 import { getParagraphText } from './utils'
 
 /**
@@ -15,49 +12,24 @@ import { getParagraphText } from './utils'
  * ![First](/a.jpg)
  * ![Second](/b.jpg)
  * [/grid]
- *
- * [grid mode="carousel"]
- * ![First](/a.jpg)
- * ![Second](/b.jpg)
- * [/grid]
  * ```
  */
 
 interface GalleryOpen {
-  closeTag: 'carousel' | 'grid'
-  mode: ExtendedMarkdownGalleryMode
+  mode: 'grid'
 }
 
-const GRID_OPEN_RE
-  = /^\s*\[grid(?:\s+(?:mode\s*=\s*)?(?:"([^"]+)"|'([^']+)'|([a-z-]+)))?\]\s*$/i
-
-const CAROUSEL_OPEN_RE = /^\s*\[carousel\]\s*$/i
+const GRID_OPEN_RE = /^\s*\[grid\]\s*$/i
 
 const GRID_CLOSE_RE = /^\s*\[\/grid\]\s*$/i
 
-const CAROUSEL_CLOSE_RE = /^\s*\[\/carousel\]\s*$/i
-
-const normalizeGalleryMode = (rawMode: string | undefined): ExtendedMarkdownGalleryMode => {
-  return rawMode?.toLowerCase() === 'carousel' ? 'carousel' : 'grid'
-}
-
 const parseGalleryOpenText = (text: string): GalleryOpen | null => {
-  if (CAROUSEL_OPEN_RE.test(text)) {
-    return {
-      closeTag: 'carousel',
-      mode: 'carousel',
-    }
-  }
-
-  const match = GRID_OPEN_RE.exec(text)
-
-  if (match == null) {
+  if (!GRID_OPEN_RE.test(text)) {
     return null
   }
 
   return {
-    closeTag: 'grid',
-    mode: normalizeGalleryMode(match[1] ?? match[2] ?? match[3]),
+    mode: 'grid',
   }
 }
 
@@ -67,26 +39,16 @@ const parseGalleryOpen = (node: RootContent): GalleryOpen | null => {
   return text == null ? null : parseGalleryOpenText(text)
 }
 
-const isGalleryCloseText = (
-  text: string,
-  closeTag: GalleryOpen['closeTag'],
-): boolean => {
-  return closeTag === 'carousel'
-    ? CAROUSEL_CLOSE_RE.test(text)
-    : GRID_CLOSE_RE.test(text)
-}
+const isGalleryCloseText = (text: string): boolean => GRID_CLOSE_RE.test(text)
 
-const isGalleryClose = (
-  node: RootContent,
-  closeTag: GalleryOpen['closeTag'],
-): boolean => {
+const isGalleryClose = (node: RootContent): boolean => {
   const text = getParagraphText(node)
 
   if (text == null) {
     return false
   }
 
-  return isGalleryCloseText(text, closeTag)
+  return isGalleryCloseText(text)
 }
 
 const createGalleryNode = (
@@ -193,7 +155,7 @@ const transformSingleParagraphGallery = (
 
   if (
     open == null
-    || !isGalleryCloseText(lastChild.value.slice(lastLineStart + 1), open.closeTag)
+    || !isGalleryCloseText(lastChild.value.slice(lastLineStart + 1))
   ) {
     return null
   }
@@ -250,7 +212,7 @@ export const transformExtendedGalleries = (
     for (let cursor = index + 1; cursor < children.length; cursor += 1) {
       const current = children[cursor]
 
-      if (isGalleryClose(current, open.closeTag)) {
+      if (isGalleryClose(current)) {
         closeIndex = cursor
         break
       }
