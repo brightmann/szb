@@ -1,14 +1,17 @@
 'use client'
 
-import type { KeyboardEvent, ReactNode } from 'react'
+import type { ComponentPropsWithoutRef, KeyboardEvent } from 'react'
 import { useState } from 'react'
 
-interface SpoilerTextProps {
-  children?: ReactNode
-  className?: string
-}
+type SpoilerTextProps = ComponentPropsWithoutRef<'span'>
 
-const SpoilerText = ({ children, className = '' }: SpoilerTextProps) => {
+const SpoilerText = ({
+  children,
+  className = '',
+  onClick,
+  onKeyDown,
+  ...props
+}: SpoilerTextProps) => {
   const [revealed, setRevealed] = useState(false)
 
   const toggle = () => {
@@ -20,15 +23,21 @@ const SpoilerText = ({ children, className = '' }: SpoilerTextProps) => {
       event.preventDefault()
       toggle()
     }
+
+    onKeyDown?.(event)
   }
 
   return (
     <span
+      {...props}
       role="button"
       tabIndex={0}
       aria-pressed={revealed}
       aria-label={revealed ? 'Hide spoiler' : 'Reveal spoiler'}
-      onClick={toggle}
+      onClick={(event) => {
+        toggle()
+        onClick?.(event)
+      }}
       onKeyDown={handleKeyDown}
       className={[
         'mx-0.5 inline cursor-pointer rounded px-1 transition-all duration-200',

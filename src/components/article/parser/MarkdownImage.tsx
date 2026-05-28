@@ -1,6 +1,6 @@
 'use client'
 
-import type { CSSProperties, KeyboardEvent } from 'react'
+import type { CSSProperties, KeyboardEvent, MouseEvent } from 'react'
 import { X, ZoomIn } from 'lucide-react'
 import { useCallback, useEffect, useId, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
@@ -142,7 +142,10 @@ export function MarkdownImage({
   const meta = parseImageMeta(alt)
   const imageSrc = typeof src === 'string' ? src : ''
   const dialogTitleId = useId()
+  const triggerButtonRef = useRef<HTMLButtonElement>(null)
+  const closeButtonRef = useRef<HTMLButtonElement>(null)
   const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const shouldRestoreFocusRef = useRef(false)
   const [canUsePortal, setCanUsePortal] = useState(false)
   const [isPreviewMounted, setIsPreviewMounted] = useState(false)
   const [isPreviewVisible, setIsPreviewVisible] = useState(false)
@@ -153,10 +156,17 @@ export function MarkdownImage({
   }, [])
 
   const closePreview = useCallback(() => {
+    if (closeTimerRef.current != null) {
+      clearTimeout(closeTimerRef.current)
+      closeTimerRef.current = null
+    }
+
     setIsPreviewVisible(false)
+    shouldRestoreFocusRef.current = true
 
     closeTimerRef.current = setTimeout(() => {
       setIsPreviewMounted(false)
+      closeTimerRef.current = null
     }, 220)
   }, [])
 
@@ -169,6 +179,11 @@ export function MarkdownImage({
     window.requestAnimationFrame(() => setIsPreviewVisible(true))
   }
 
+  const handleCloseButtonClick = (event: MouseEvent<HTMLButtonElement>) => {
+    event.stopPropagation()
+    closePreview()
+  }
+
   useEffect(() => {
     return () => {
       if (closeTimerRef.current != null) {
@@ -176,6 +191,15 @@ export function MarkdownImage({
       }
     }
   }, [])
+
+  useEffect(() => {
+    if (isPreviewMounted || !shouldRestoreFocusRef.current) {
+      return
+    }
+
+    shouldRestoreFocusRef.current = false
+    triggerButtonRef.current?.focus({ preventScroll: true })
+  }, [isPreviewMounted])
 
   useEffect(() => {
     if (!isPreviewMounted) {
@@ -191,6 +215,9 @@ export function MarkdownImage({
     const previousOverflow = document.body.style.overflow
     document.body.style.overflow = 'hidden'
     window.addEventListener('keydown', handleKeyDown)
+    window.requestAnimationFrame(() => {
+      closeButtonRef.current?.focus({ preventScroll: true })
+    })
 
     return () => {
       document.body.style.overflow = previousOverflow
@@ -222,6 +249,7 @@ export function MarkdownImage({
               'relative flex max-h-full w-full max-w-6xl flex-col items-center gap-3 transition-transform duration-300 ease-out',
               isPreviewVisible ? 'scale-100' : 'scale-95',
             ].join(' ')}
+            onClick={event => event.stopPropagation()}
           >
             <span id={dialogTitleId} className="sr-only">
               Image preview:
@@ -229,10 +257,11 @@ export function MarkdownImage({
               {meta.alt}
             </span>
             <button
+              ref={closeButtonRef}
               type="button"
               className="absolute right-2 top-2 z-10 inline-flex h-10 w-10 items-center justify-center rounded-full bg-black/65 text-white transition-colors hover:bg-black/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
               aria-label="Close image preview"
-              onClick={closePreview}
+              onClick={handleCloseButtonClick}
             >
               <X className="h-5 w-5" aria-hidden="true" />
             </button>
@@ -269,6 +298,7 @@ export function MarkdownImage({
       style={getWrapperStyle(meta)}
     >
       <button
+        ref={triggerButtonRef}
         type="button"
         className={getButtonClassName(meta.layout)}
         data-markdown-image-preview=""

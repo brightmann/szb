@@ -7,6 +7,8 @@ const MARKDOWN_ARTICLE_INTERACTIONS_SCRIPT = String.raw`
   window.__suzuMarkdownInteractions = true;
 
   const PREVIEW_CLOSE_DELAY = 220;
+  let activePreviewCloseTimer = null;
+  let activePreviewTrigger = null;
 
   const getRoot = () => document.querySelector('.post-content');
 
@@ -27,11 +29,26 @@ const MARKDOWN_ARTICLE_INTERACTIONS_SCRIPT = String.raw`
     const caption = document.createElement('span');
     const titleId = 'markdown-image-preview-' + Math.random().toString(36).slice(2);
     const previousOverflow = document.body.style.overflow;
+    let isClosing = false;
 
     const close = () => {
+      if (isClosing) {
+        return;
+      }
+
+      isClosing = true;
+      if (activePreviewCloseTimer != null) {
+        window.clearTimeout(activePreviewCloseTimer);
+      }
+
       overlay.dataset.visible = 'false';
       document.body.style.overflow = previousOverflow;
-      window.setTimeout(() => overlay.remove(), PREVIEW_CLOSE_DELAY);
+      activePreviewCloseTimer = window.setTimeout(() => {
+        overlay.remove();
+        activePreviewTrigger?.focus({ preventScroll: true });
+        activePreviewCloseTimer = null;
+        activePreviewTrigger = null;
+      }, PREVIEW_CLOSE_DELAY);
     };
 
     overlay.className = 'markdown-image-preview fixed inset-0 z-[9999] flex min-h-dvh items-center justify-center bg-black/80 p-4 backdrop-blur-sm sm:p-6';
@@ -57,13 +74,17 @@ const MARKDOWN_ARTICLE_INTERACTIONS_SCRIPT = String.raw`
     caption.className = 'max-w-3xl text-center text-sm leading-relaxed text-white/85';
     caption.textContent = alt;
 
-    closeButton.addEventListener('click', close);
+    closeButton.addEventListener('click', (event) => {
+      event.stopPropagation();
+      close();
+    });
     overlay.addEventListener('click', close);
     frame.addEventListener('click', (event) => event.stopPropagation());
 
     frame.append(title, closeButton, previewImage, caption);
     overlay.append(frame);
     document.body.append(overlay);
+    activePreviewTrigger = button;
     document.body.style.overflow = 'hidden';
     window.requestAnimationFrame(() => {
       overlay.dataset.visible = 'true';

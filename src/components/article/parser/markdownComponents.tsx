@@ -230,19 +230,19 @@ const createMarkdownComponents = (translation: Translation, autoSlug: boolean = 
         </span>
       </label>
     ),
-    span: ({ className = '', children }) => {
+    span: ({ className = '', children, node: _node, ...props }) => {
       const isSpoiler = className.split(/\s+/).includes('discourse-spoiler')
 
       if (isSpoiler) {
         return (
-          <SpoilerText className={className}>
+          <SpoilerText className={className} {...props}>
             {children}
           </SpoilerText>
         )
       }
 
       return (
-        <span className={className}>
+        <span className={className} {...props}>
           {children}
         </span>
       )

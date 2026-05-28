@@ -54,7 +54,7 @@ const createDetailsNode = (
     },
   },
   children: [
-    createSummaryNode(title) as unknown as RootContent,
+    createSummaryNode(title),
     ...children,
   ],
 })

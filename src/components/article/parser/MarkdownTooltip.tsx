@@ -53,8 +53,19 @@ interface TooltipPosition {
   width?: string
 }
 
+const decodeHashId = (hash: string): string => {
+  const rawId = hash.replace(/^#/, '')
+
+  try {
+    return decodeURIComponent(rawId)
+  }
+  catch {
+    return rawId
+  }
+}
+
 const getFootnoteText = (hash: string): string => {
-  const id = decodeURIComponent(hash.replace(/^#/, ''))
+  const id = decodeHashId(hash)
 
   return document.getElementById(id)?.textContent?.replaceAll('↩', '').replaceAll(/\s+/g, ' ').trim() ?? ''
 }
@@ -69,7 +80,7 @@ const getPreviewText = (
 }
 
 const scrollToHashTarget = (hash: string) => {
-  const id = decodeURIComponent(hash.replace(/^#/, ''))
+  const id = decodeHashId(hash)
   const target = document.getElementById(id)
 
   if (target == null) {
@@ -295,6 +306,7 @@ export function MarkdownFootnoteReference({
   const tooltipRef = useRef<HTMLSpanElement>(null)
   const [preview, setPreview] = useState(staticPreview)
   const { position, updatePosition } = useTooltipPosition(triggerRef, tooltipRef, 288)
+  const hasPreview = preview !== ''
 
   useEffect(() => {
     if (href.startsWith('#')) {
@@ -332,7 +344,7 @@ export function MarkdownFootnoteReference({
           className,
         )}
         aria-label={`Jump to footnote ${label}`}
-        aria-describedby={preview !== '' ? tooltipId : undefined}
+        aria-describedby={hasPreview ? tooltipId : undefined}
         onClick={handleClick}
         onFocus={handleFocus}
         onMouseEnter={updatePreview}
@@ -341,23 +353,25 @@ export function MarkdownFootnoteReference({
         {children}
       </a>
 
-      <span
-        id={tooltipId}
-        ref={tooltipRef}
-        data-ready={position != null}
-        data-placement={position?.placement ?? 'above'}
-        className={cx(
-          'markdown-tooltip-surface',
-          'pointer-events-none z-40 w-max rounded-md border border-primary-300/40',
-          position == null ? 'absolute bottom-full left-0 mb-2' : 'fixed',
-          'bg-background px-3 py-2 text-left text-xs font-medium leading-relaxed text-gray-800 shadow-lg shadow-primary-950/10',
-          'dark:border-primary-200/40 dark:text-gray-100',
-        )}
-        role="tooltip"
-        style={getTooltipStyle(position, 288)}
-      >
-        {preview}
-      </span>
+      {hasPreview && (
+        <span
+          id={tooltipId}
+          ref={tooltipRef}
+          data-ready={position != null}
+          data-placement={position?.placement ?? 'above'}
+          className={cx(
+            'markdown-tooltip-surface',
+            'pointer-events-none z-40 w-max rounded-md border border-primary-300/40',
+            position == null ? 'absolute bottom-full left-0 mb-2' : 'fixed',
+            'bg-background px-3 py-2 text-left text-xs font-medium leading-relaxed text-gray-800 shadow-lg shadow-primary-950/10',
+            'dark:border-primary-200/40 dark:text-gray-100',
+          )}
+          role="tooltip"
+          style={getTooltipStyle(position, 288)}
+        >
+          {preview}
+        </span>
+      )}
     </span>
   )
 }

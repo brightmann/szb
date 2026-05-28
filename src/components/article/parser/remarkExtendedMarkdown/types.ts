@@ -128,7 +128,6 @@ export interface FlowParent {
 declare module 'mdast' {
   interface PhrasingContentMap {
     extendedMarkdownSpoiler: ExtendedMarkdownSpoiler
-    extendedMarkdownSummary: ExtendedMarkdownSummary
     extendedMarkdownMark: ExtendedMarkdownMark
     extendedMarkdownSub: ExtendedMarkdownSub
     extendedMarkdownSup: ExtendedMarkdownSup
@@ -137,6 +136,7 @@ declare module 'mdast' {
 
   interface RootContentMap {
     extendedMarkdownDetails: ExtendedMarkdownDetails
+    extendedMarkdownSummary: ExtendedMarkdownSummary
     extendedMarkdownAdmonition: ExtendedMarkdownAdmonition
     extendedMarkdownImageGallery: ExtendedMarkdownImageGallery
   }
