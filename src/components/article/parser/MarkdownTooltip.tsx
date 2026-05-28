@@ -9,7 +9,7 @@ import type {
   RefObject,
 } from 'react'
 import { CornerUpLeft } from 'lucide-react'
-import { useEffect, useId, useRef, useState } from 'react'
+import { useCallback, useEffect, useId, useRef, useState } from 'react'
 
 /**
  * Inline tooltip primitives for Markdown-only affordances.
@@ -25,6 +25,7 @@ interface MarkdownAbbreviationProps extends ComponentPropsWithoutRef<'abbr'> {
 
 interface MarkdownFootnoteReferenceProps extends ComponentPropsWithoutRef<'a'> {
   'children'?: ReactNode
+  'data-footnote-preview'?: string
   'data-footnote-ref'?: boolean | string
   'node'?: unknown
 }
@@ -41,17 +42,30 @@ const cx = (...classes: Array<string | undefined | false | null>) => {
 
 const TOOLTIP_VIEWPORT_PADDING = 16
 const TOOLTIP_GAP = 8
+const COMPACT_TOOLTIP_BREAKPOINT = 640
+const MINIMUM_TOP_SPACE_FOR_ABOVE_TOOLTIP = 96
 
 interface TooltipPosition {
   left: number
+  maxHeight?: number
   placement: 'above' | 'below'
   top: number
+  width?: string
 }
 
 const getFootnoteText = (hash: string): string => {
   const id = decodeURIComponent(hash.replace(/^#/, ''))
 
   return document.getElementById(id)?.textContent?.replaceAll('↩', '').replaceAll(/\s+/g, ' ').trim() ?? ''
+}
+
+const getPreviewText = (
+  href: string,
+  fallback: string,
+): string => {
+  const domPreview = href.startsWith('#') ? getFootnoteText(href) : ''
+
+  return domPreview !== '' ? domPreview : fallback
 }
 
 const scrollToHashTarget = (hash: string) => {
@@ -70,57 +84,117 @@ const scrollToHashTarget = (hash: string) => {
 
 const getTooltipPosition = (
   trigger: HTMLElement,
+  tooltip: HTMLElement,
   maxWidth: number,
 ): TooltipPosition => {
   const rect = trigger.getBoundingClientRect()
   const viewportWidth = window.innerWidth
+  const viewportHeight = window.innerHeight
   const tooltipWidth = Math.min(maxWidth, viewportWidth - TOOLTIP_VIEWPORT_PADDING * 2)
+  const tooltipHeight = tooltip.getBoundingClientRect().height
+
+  if (viewportWidth < COMPACT_TOOLTIP_BREAKPOINT) {
+    const maxHeight = viewportHeight - TOOLTIP_VIEWPORT_PADDING * 2
+
+    return {
+      left: TOOLTIP_VIEWPORT_PADDING,
+      maxHeight,
+      placement: 'below',
+      top: Math.max(TOOLTIP_VIEWPORT_PADDING, viewportHeight - Math.min(tooltipHeight, maxHeight) - TOOLTIP_VIEWPORT_PADDING),
+      width: `calc(100vw - ${TOOLTIP_VIEWPORT_PADDING * 2}px)`,
+    }
+  }
+
   const centeredLeft = rect.left + rect.width / 2 - tooltipWidth / 2
   const left = Math.min(
     Math.max(centeredLeft, TOOLTIP_VIEWPORT_PADDING),
     viewportWidth - tooltipWidth - TOOLTIP_VIEWPORT_PADDING,
   )
-  const placement = rect.top < 96 ? 'below' : 'above'
+  const spaceAbove = rect.top - TOOLTIP_VIEWPORT_PADDING
+  const spaceBelow = viewportHeight - rect.bottom - TOOLTIP_VIEWPORT_PADDING
+  const canFitAbove = spaceAbove >= tooltipHeight + TOOLTIP_GAP
+  const canFitBelow = spaceBelow >= tooltipHeight + TOOLTIP_GAP
+  const placement = canFitAbove || (!canFitBelow && spaceAbove >= MINIMUM_TOP_SPACE_FOR_ABOVE_TOOLTIP)
+    ? 'above'
+    : 'below'
+  const availableHeight = placement === 'above'
+    ? rect.top - TOOLTIP_VIEWPORT_PADDING - TOOLTIP_GAP
+    : viewportHeight - rect.bottom - TOOLTIP_VIEWPORT_PADDING - TOOLTIP_GAP
+  const maxHeight = Math.max(availableHeight, 0)
+  const renderedHeight = Math.min(tooltipHeight, maxHeight)
+  const unclampedTop = placement === 'above'
+    ? rect.top - renderedHeight - TOOLTIP_GAP
+    : rect.bottom + TOOLTIP_GAP
+  const top = Math.min(
+    Math.max(unclampedTop, TOOLTIP_VIEWPORT_PADDING),
+    viewportHeight - renderedHeight - TOOLTIP_VIEWPORT_PADDING,
+  )
 
   return {
     left,
+    maxHeight,
     placement,
-    top: placement === 'above'
-      ? rect.top - TOOLTIP_GAP
-      : rect.bottom + TOOLTIP_GAP,
+    top,
   }
 }
 
 const getTooltipStyle = (
   position: TooltipPosition | null,
   maxWidth: number,
-): CSSProperties | undefined => {
+): CSSProperties => {
+  const baseStyle: CSSProperties = {
+    maxHeight: position?.maxHeight,
+    maxWidth: `min(${maxWidth}px, calc(100vw - ${TOOLTIP_VIEWPORT_PADDING * 2}px))`,
+    width: position?.width,
+  }
+
   if (position == null) {
-    return undefined
+    return baseStyle
   }
 
   return {
+    ...baseStyle,
     left: position.left,
-    maxWidth: `min(${maxWidth}px, calc(100vw - ${TOOLTIP_VIEWPORT_PADDING * 2}px))`,
     top: position.top,
   }
 }
 
 const useTooltipPosition = (
   triggerRef: RefObject<HTMLElement | null>,
+  tooltipRef: RefObject<HTMLElement | null>,
   maxWidth: number,
 ) => {
   const [position, setPosition] = useState<TooltipPosition | null>(null)
 
-  const updatePosition = () => {
+  const updatePosition = useCallback(() => {
     const trigger = triggerRef.current
+    const tooltip = tooltipRef.current
 
-    if (trigger == null) {
+    if (trigger == null || tooltip == null) {
       return
     }
 
-    setPosition(getTooltipPosition(trigger, maxWidth))
-  }
+    setPosition(getTooltipPosition(trigger, tooltip, maxWidth))
+  }, [maxWidth, tooltipRef, triggerRef])
+
+  useEffect(() => {
+    let frame = 0
+
+    const schedulePositionUpdate = () => {
+      cancelAnimationFrame(frame)
+      frame = requestAnimationFrame(updatePosition)
+    }
+
+    updatePosition()
+    window.addEventListener('resize', schedulePositionUpdate)
+    window.addEventListener('scroll', schedulePositionUpdate, true)
+
+    return () => {
+      cancelAnimationFrame(frame)
+      window.removeEventListener('resize', schedulePositionUpdate)
+      window.removeEventListener('scroll', schedulePositionUpdate, true)
+    }
+  }, [updatePosition])
 
   return {
     position,
@@ -139,7 +213,8 @@ export function MarkdownAbbreviation({
   const label = children?.toString() ?? ''
   const tooltipId = useId()
   const triggerRef = useRef<HTMLElement>(null)
-  const { position, updatePosition } = useTooltipPosition(triggerRef, 256)
+  const tooltipRef = useRef<HTMLSpanElement>(null)
+  const { position, updatePosition } = useTooltipPosition(triggerRef, tooltipRef, 256)
 
   return (
     <span className="group/abbr relative inline-flex items-baseline">
@@ -157,6 +232,14 @@ export function MarkdownAbbreviation({
         onFocus={(event) => {
           updatePosition()
           props.onFocus?.(event)
+        }}
+        onClick={(event) => {
+          updatePosition()
+          props.onClick?.(event)
+        }}
+        onMouseEnter={(event) => {
+          updatePosition()
+          props.onMouseEnter?.(event)
         }}
         onPointerEnter={(event) => {
           updatePosition()
@@ -178,10 +261,13 @@ export function MarkdownAbbreviation({
       {explanation != null && (
         <span
           id={tooltipId}
+          ref={tooltipRef}
+          data-ready={position != null}
           data-placement={position?.placement ?? 'above'}
           className={cx(
             'markdown-tooltip-surface',
-            'pointer-events-none fixed z-40 w-max rounded-md border border-primary-300/40',
+            'pointer-events-none z-40 w-max rounded-md border border-primary-300/40',
+            position == null ? 'absolute bottom-full left-0 mb-2' : 'fixed',
             'bg-background px-3 py-2 text-xs font-medium leading-relaxed text-gray-800 shadow-lg shadow-primary-950/10',
             'dark:border-primary-200/40 dark:text-gray-100',
           )}
@@ -198,6 +284,7 @@ export function MarkdownAbbreviation({
 export function MarkdownFootnoteReference({
   children,
   className,
+  'data-footnote-preview': staticPreview = '',
   href = '#',
   node: _node,
   ...props
@@ -205,18 +292,20 @@ export function MarkdownFootnoteReference({
   const label = children?.toString() ?? ''
   const tooltipId = useId()
   const triggerRef = useRef<HTMLAnchorElement>(null)
-  const [preview, setPreview] = useState('')
-  const { position, updatePosition } = useTooltipPosition(triggerRef, 288)
+  const tooltipRef = useRef<HTMLSpanElement>(null)
+  const [preview, setPreview] = useState(staticPreview)
+  const { position, updatePosition } = useTooltipPosition(triggerRef, tooltipRef, 288)
 
   useEffect(() => {
     if (href.startsWith('#')) {
-      setPreview(getFootnoteText(href))
+      setPreview(getPreviewText(href, staticPreview))
     }
-  }, [href])
+  }, [href, staticPreview])
 
   const updatePreview = () => {
-    setPreview(href.startsWith('#') ? getFootnoteText(href) : '')
+    setPreview(getPreviewText(href, staticPreview))
     updatePosition()
+    requestAnimationFrame(updatePosition)
   }
 
   const handleClick = (event: MouseEvent<HTMLAnchorElement>) => {
@@ -246,6 +335,7 @@ export function MarkdownFootnoteReference({
         aria-describedby={preview !== '' ? tooltipId : undefined}
         onClick={handleClick}
         onFocus={handleFocus}
+        onMouseEnter={updatePreview}
         onPointerEnter={updatePreview}
       >
         {children}
@@ -253,10 +343,13 @@ export function MarkdownFootnoteReference({
 
       <span
         id={tooltipId}
+        ref={tooltipRef}
+        data-ready={position != null}
         data-placement={position?.placement ?? 'above'}
         className={cx(
           'markdown-tooltip-surface',
-          'pointer-events-none fixed z-40 w-max rounded-md border border-primary-300/40',
+          'pointer-events-none z-40 w-max rounded-md border border-primary-300/40',
+          position == null ? 'absolute bottom-full left-0 mb-2' : 'fixed',
           'bg-background px-3 py-2 text-left text-xs font-medium leading-relaxed text-gray-800 shadow-lg shadow-primary-950/10',
           'dark:border-primary-200/40 dark:text-gray-100',
         )}

@@ -21,6 +21,7 @@ const FriendLinks = dynamic(async () => import('./FriendLinks'))
 
 type MarkdownAnchorProps = ComponentPropsWithoutRef<'a'> & {
   'data-footnote-backref'?: boolean | string
+  'data-footnote-preview'?: string
   'data-footnote-ref'?: boolean | string
   'node'?: unknown
 }
