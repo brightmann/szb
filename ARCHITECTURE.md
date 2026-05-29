@@ -1,6 +1,8 @@
 # Architecture
 
-SuzuBlog is a minimalist blog template built with Next.js App Router, React, TypeScript, Tailwind CSS, and Markdown content files. It is designed to be deployed as a static-friendly Next.js site, with optional deployment to Vercel support.
+[English](./ARCHITECTURE.md) | [中文](./ARCHITECTURE_ZH.md)
+
+SuzuBlog is a minimalist blog template built with Next.js App Router, React, TypeScript, Tailwind CSS, and Markdown content files. It is designed to be deployed as a static-friendly Next.js site, with first-class Vercel support.
 
 ## Runtime Model
 

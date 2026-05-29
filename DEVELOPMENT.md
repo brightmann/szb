@@ -1,5 +1,7 @@
 # Development Guide
 
+[English](./DEVELOPMENT.md) | [中文](./DEVELOPMENT_ZH.md)
+
 This guide covers local setup, content editing, validation, and deployment for SuzuBlog.
 
 ## Prerequisites

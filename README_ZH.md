@@ -34,6 +34,12 @@
 
 📖 **[Suzu Blog 官方文档](https://suzu.zla.app)**
 
+## 📚 仓库文档
+
+- [架构说明](./ARCHITECTURE_ZH.md) | [English](./ARCHITECTURE.md)
+- [开发指南](./DEVELOPMENT_ZH.md) | [English](./DEVELOPMENT.md)
+- [贡献指南](./CONTRIBUTING_ZH.md) | [English](./CONTRIBUTING.md)
+
 ## 🏗️ 项目结构
 
 ```plaintext

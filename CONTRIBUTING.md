@@ -2,6 +2,8 @@
 
 # Contributing to SuzuBlog
 
+[English](./CONTRIBUTING.md) | [中文](./CONTRIBUTING_ZH.md)
+
 Thanks for taking the time to contribute. SuzuBlog is a Next.js + Markdown blog template, so changes should stay small, practical, and easy for site owners to adapt.
 
 Please also read the [Code of Conduct](./CODE_OF_CONDUCT.md).
