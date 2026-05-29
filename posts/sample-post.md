@@ -52,6 +52,16 @@ Here is a kbd example: <kbd>Ctrl</kbd> + <kbd>C</kbd> and <kbd>Command</kbd> + <
 
 H~2~O, E=mc^2^
 
+HTML and CSS abbreviations expose their meaning on hover or keyboard focus.
+
+\*[HTML]: HyperText Markup Language
+
+\*[CSS]: Cascading Style Sheets
+
+Smart punctuation turns ranges like 2024--2026 into an en dash, and breaks---like this---into em dashes.
+
+Emoji shortcodes work with GitHub-style names: :wink: :cry: :sparkles:
+
 ### Notes
 
 A note [^1] and another note [^2]
@@ -64,16 +74,51 @@ A note [^1] and another note [^2]
 
 - [ ] to do
 - [x] done
+- [ ] review custom Markdown rendering
 
 <details>
 <summary>点击展开</summary>
-这里是可折叠的内容。
+
+这里是默认 web 原生版本可折叠的内容。
+
+- 支持列表
+- 支持 **Markdown**
+
 </details>
+
+[details="点击展开"]
+
+这里是 Discourse 版本可折叠的内容。
+
+- 支持列表
+- 支持 **Markdown**
+
+[/details]
 
 ### Special Quotes
 
+Use fenced admonitions for callouts:
+
+```md
+::: warning Optional title
+Content supports **Markdown**.
+:::
+```
+
+::: info
+This is an info callout.
+:::
+
 ::: tip
-This is a tip
+This is a tip with **Markdown** inside.
+:::
+
+::: warning Pay attention
+This is a warning callout that wraps on small screens and works in light and dark mode.
+:::
+
+::: danger
+This is a danger callout.
 :::
 
 ## Lists
@@ -84,6 +129,9 @@ This is a tip
 - Item 2
 - Item 2a
 - Item 2b
+- Nested items keep readable spacing:
+  - Child item
+  - Another child item
 
 ### Ordered
 
@@ -96,6 +144,48 @@ This is a tip
 ## Links
 
 You may be using [Markdown Live Preview](https://markdownlivepreview.com/).
+
+## Images
+
+Discourse-style image metadata can control size and layout:
+
+```md
+![Centered sample|640x360, 75%](/images/background.jpg)
+![Left wrapped sample|320x180, left](/images/background.jpg)
+![Wide sample|wide](/images/background.jpg)
+```
+
+![Centered sample|640x360, 75%](/images/background.jpg)
+
+![Left wrapped sample|320x180, left](/images/background.jpg)
+
+This paragraph wraps around the left image on larger screens while still stacking cleanly on mobile.
+
+![Wide sample|wide](/images/background.jpg)
+
+Click any Markdown image to open a larger preview.
+
+Discourse-style image grids:
+
+```md
+[grid]
+![Grid sample 1|640x360](/images/background.jpg)
+![Grid sample 2|480x720](/images/avatar.jpg)
+![Grid sample 3|640x640](/images/copyright.png)
+![Grid sample 4|640x520](/images/projects/deep-learning.jpg)
+![Grid sample 5|420x560](/images/background.jpg)
+![Grid sample 6|640x430](/images/avatar.jpg)
+[/grid]
+```
+
+[grid]
+![Grid sample 1|640x360](/images/background.jpg)
+![Grid sample 2|480x720](/images/avatar.jpg)
+![Grid sample 3|640x640](/images/copyright.png)
+![Grid sample 4|640x520](/images/projects/deep-learning.jpg)
+![Grid sample 5|420x560](/images/background.jpg)
+![Grid sample 6|640x430](/images/avatar.jpg)
+[/grid]
 
 ## Blockquotes
 
