@@ -103,6 +103,10 @@ const MARKDOWN_ARTICLE_INTERACTIONS_SCRIPT = String.raw`
     const previewButton = target.closest('button[data-markdown-image-preview]');
 
     if (previewButton != null) {
+      if (previewButton.hasAttribute('data-markdown-image-hydrated')) {
+        return;
+      }
+
       event.preventDefault();
       event.stopPropagation();
       openImagePreview(previewButton);
