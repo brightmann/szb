@@ -63,7 +63,7 @@ Features that only serve one private site may be better handled through local cu
 
 Use the versions declared by the repository:
 
-- Node.js >= 22 from `.node-version`
+- Node.js >= 20.9.0 from `.node-version`
 - pnpm from `package.json`
 
 Install dependencies:

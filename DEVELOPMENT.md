@@ -6,7 +6,7 @@ This guide covers local setup, content editing, validation, and deployment for S
 
 ## Prerequisites
 
-- Node.js >= 22, prefer matching `.node-version`
+- Node.js >= 20.9.0, prefer matching `.node-version`
 - pnpm, matching `packageManager` in `package.json`
 
 Install dependencies:

@@ -6,7 +6,7 @@
 
 ## 前置要求
 
-- Node.js >= 22，优先匹配 `.node-version`
+- Node.js >= 20.9.0，优先匹配 `.node-version`
 - pnpm，匹配 `package.json` 中的 `packageManager`
 
 安装依赖：

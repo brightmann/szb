@@ -63,7 +63,7 @@
 
 使用仓库声明的版本：
 
-- Node.js >= 22，参考 `.node-version`
+- Node.js >= 20.9.0，参考 `.node-version`
 - pnpm，参考 `package.json`
 
 安装依赖：
