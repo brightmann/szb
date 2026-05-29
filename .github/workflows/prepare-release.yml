@@ -14,6 +14,10 @@ on:
         type: choice
         options: [alpha, beta, rc]
         default: beta
+      previous_tag:
+        description: Previous tag used as changelog base (optional; defaults to latest semver tag)
+        required: false
+        type: string
 permissions:
   contents: write
   issues: write
@@ -95,7 +99,10 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          PREV_TAG="$(git describe --tags --abbrev=0 --match 'v*.*.*' 2>/dev/null || true)"
+          PREV_TAG="${{ inputs.previous_tag }}"
+          if [ -z "$PREV_TAG" ]; then
+            PREV_TAG="$(git describe --tags --abbrev=0 --match 'v*.*.*' 2>/dev/null || true)"
+          fi
           echo "PREV_TAG=$PREV_TAG" >> "$GITHUB_ENV"
           echo "prev_tag=$PREV_TAG" >> "$GITHUB_OUTPUT"
           echo "Previous tag: $PREV_TAG"
