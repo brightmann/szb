@@ -4,7 +4,17 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/ZL-Asica/SuzuBlog/compare/v1.12.2...HEAD)
+## [Unreleased](https://github.com/ZL-Asica/SuzuBlog/compare/v1.13.0...HEAD)
+
+## [1.13.0](https://github.com/ZL-Asica/SuzuBlog/compare/v1.12.2...v1.13.0) - 2026-05-30
+
+### 🚀 Features / 新功能
+- feat(markdown): add rich markdown rendering support ([#232](https://github.com/ZL-Asica/SuzuBlog/pull/232)) by @ZL-Asica
+### 📖 Documentation / 文档更新
+- docs(project): align repository documentation ([#234](https://github.com/ZL-Asica/SuzuBlog/pull/234)) by @ZL-Asica
+### 🧰 Internal / 内部变更
+- ci(release): automate release pipeline ([#236](https://github.com/ZL-Asica/SuzuBlog/pull/236)) by @ZL-Asica
+- ci(release): automate release pipeline ci ([#237](https://github.com/ZL-Asica/SuzuBlog/pull/237)) by @ZL-Asica
 
 ## [1.12.2](https://github.com/ZL-Asica/SuzuBlog/compare/v1.12.1...v1.12.2) - 2026-01-31
 
