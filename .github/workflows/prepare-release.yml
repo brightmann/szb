@@ -18,6 +18,10 @@ on:
         description: Previous tag used as changelog base (optional; defaults to latest semver tag)
         required: false
         type: string
+      release_summary:
+        description: Manual release summary prepended to the generated release notes (optional)
+        required: false
+        type: string
 permissions:
   contents: write
   issues: write
@@ -111,10 +115,13 @@ jobs:
       - name: Generate release notes (GitHub)
         id: notes
         uses: actions/github-script@v7
+        env:
+          RELEASE_SUMMARY: ${{ inputs.release_summary }}
         with:
           script: |
             const prev = process.env.PREV_TAG || undefined;
             const nextTag = `v${process.env.NEXT_VERSION}`;
+            const manualSummary = (process.env.RELEASE_SUMMARY || "").trim();
             const { owner, repo } = context.repo;
 
             const res = await github.rest.repos.generateReleaseNotes({
@@ -126,8 +133,9 @@ jobs:
             });
 
             const raw = (res.data.body || "").trim();
+            const generated = raw.replace(/^<!--[\s\S]*?-->\s*/m, "").trim();
 
-            let changelog = raw;
+            let changelog = generated;
 
             // 1) Drop "What's Changed" heading (any heading level)
             changelog = changelog.replace(/^\s*#+\s+What's Changed\s*\n+/im, "");
@@ -158,12 +166,16 @@ jobs:
             // 7) Tidy whitespace
             changelog = changelog.replace(/\n{3,}/g, "\n\n").trim();
 
-            // 8) Ensure blank line after leading HTML comment (if present)
-            changelog = changelog.replace(/^(<!--[\s\S]*?-->)(?!\n\n)/, "$1\n\n");
+            const releaseBody = generated
+              .replace(/^\s*#+\s+What's Changed\s*\n+/im, "")
+              .replace(/\n{3,}/g, "\n\n")
+              .trim();
+            const body = [manualSummary, releaseBody].filter(Boolean).join("\n\n");
+            const changelogBody = [manualSummary, changelog].filter(Boolean).join("\n\n");
 
             core.setOutput("name", res.data.name || nextTag);
-            core.setOutput("body_raw", raw);
-            core.setOutput("body_changelog", changelog);
+            core.setOutput("body_pr", body);
+            core.setOutput("body_changelog", changelogBody);
 
       # 3.1) If notes empty (e.g., everything excluded), stop early to avoid empty release PR
       - name: Stop if no release notes
@@ -179,6 +191,7 @@ jobs:
         uses: stefanzweifel/changelog-updater-action@v1
         with:
           latest-version: v${{ steps.bump.outputs.next_version }}
+          heading-text: ${{ steps.bump.outputs.next_version }}
           release-notes: ${{ steps.notes.outputs.body_changelog }}
 
       # 5) create Release PR
@@ -195,7 +208,7 @@ jobs:
             Previous tag: `${{ steps.prev.outputs.prev_tag }}`
 
             ## Release notes
-            ${{ steps.notes.outputs.body_raw }}
+            ${{ steps.notes.outputs.body_pr }}
 
           labels: release
           add-paths: |
