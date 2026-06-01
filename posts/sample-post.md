@@ -62,6 +62,8 @@ Smart punctuation turns ranges like 2024--2026 into an en dash, and breaks---lik
 
 Emoji shortcodes work with GitHub-style names: :wink: :cry: :sparkles:
 
+Emoji shortcodes also render inside spoilers: [spoiler]:wink: :cry:[/spoiler]
+
 ### Notes
 
 A note [^1] and another note [^2]
