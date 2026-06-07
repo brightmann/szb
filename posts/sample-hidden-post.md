@@ -5,9 +5,7 @@ categories:
   - Example
 tags:
   - Post
-  - Hidden
-showLicense: false
-status: hidden
+  - xyz
 ---
 
 This is a **hidden** post (stronger than `draft`).
